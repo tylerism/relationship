@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "answers": {
+          "$cardId": {
+            ".validate": "newData.hasChildren(['answer', 'question']) && newData.child('answer').isString() && newData.child('question').isString()"
+          }
+        },
+        "skipped": {
+          "$cardId": {
+            ".validate": "newData.isBoolean() && newData.val() === true"
+          }
+        }
+      }
+    }
+  }
+}

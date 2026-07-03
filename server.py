@@ -20,7 +20,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent / "public"
 DEFAULT_PORT = 8000
 
 
@@ -54,6 +54,7 @@ def main() -> None:
     with socketserver.TCPServer(("", args.port), Handler) as httpd:
         print(f"Serving {ROOT / 'index.html'}")
         print(f"Local: http://localhost:{args.port}")
+        print("For Firebase sync locally, run: firebase emulators:start")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
