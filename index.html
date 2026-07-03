@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connection Cards</title>
+  <style>
+    :root {
+      --bg1: #ffedf6;
+      --bg2: #efe7ff;
+      --spot1: rgba(255,255,255,.9);
+      --spot2: rgba(255,204,231,.85);
+      --ink: #2c1733;
+      --muted: #7e6687;
+      --card: rgba(255,255,255,.82);
+      --accent: #c44f92;
+      --accent2: #7c4dff;
+      --glow: rgba(196,79,146,.22);
+      --shadow: 0 24px 70px rgba(84, 36, 92, .22);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 14%, var(--spot1) 0 8%, transparent 30%),
+        radial-gradient(circle at 88% 12%, var(--spot2) 0 12%, transparent 32%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+      transition: background .35s ease, color .2s ease;
+    }
+
+    .app {
+      width: min(980px, 100%);
+      display: grid;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 4.2rem);
+      letter-spacing: -.06em;
+      line-height: .95;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .pill {
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .menu {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      padding: 12px;
+      background: rgba(255,255,255,.45);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 24px;
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 24px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .category-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255,255,255,.72);
+      font-weight: 800;
+      text-align: left;
+      transition: transform .16s ease, background .16s ease, color .16s ease;
+    }
+
+    .category-btn:hover { transform: translateY(-2px); }
+
+    .category-btn.active {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .stage {
+      min-height: 470px;
+      display: grid;
+      justify-items: center;
+      align-content: start;
+      gap: 14px;
+    }
+
+    .card {
+      width: min(650px, 100%);
+      min-height: 380px;
+      padding: clamp(28px, 6vw, 54px);
+      border-radius: 38px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.85);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -80px auto auto -80px;
+      width: 190px;
+      height: 190px;
+      background: radial-gradient(circle, var(--glow), transparent 68%);
+      border-radius: 50%;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: .92rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .question {
+      margin: 38px 0;
+      font-size: clamp(2rem, 6.2vw, 3.5rem);
+      line-height: 1.02;
+      letter-spacing: -.05em;
+      font-weight: 900;
+    }
+
+    .depth {
+      font-size: 1.25rem;
+      letter-spacing: .12em;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      width: min(650px, 100%);
+    }
+
+    .action {
+      padding: 14px 20px;
+      border-radius: 18px;
+      background: white;
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 0 12px 30px rgba(84, 36, 92, .13);
+    }
+
+    .action.icon-action {
+      width: 54px;
+      padding: 14px 0;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .action.primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .action.danger {
+      color: white;
+      background: linear-gradient(135deg, #cf2e55, #b5179e);
+    }
+
+    .answer-panel {
+      width: min(650px, 100%);
+      margin: 4px auto 0;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: 0 12px 30px rgba(84, 36, 92, .1);
+      color: var(--ink);
+    }
+
+    .answer-title {
+      margin: 0 0 10px;
+      font-size: .88rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .answer-text {
+      margin: 0;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-size: 1.02rem;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 14, 35, .5);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      z-index: 40;
+      padding: 18px;
+    }
+
+    .modal-overlay[hidden] {
+      display: none !important;
+    }
+
+    .modal {
+      width: min(640px, 100%);
+      border-radius: 24px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.85);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .modal h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -.02em;
+    }
+
+    .modal p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .answer-input {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,.12);
+      padding: 12px 14px;
+      font: inherit;
+      color: var(--ink);
+      background: rgba(255,255,255,.92);
+      line-height: 1.45;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .counter {
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      .content {
+        grid-template-columns: 1fr;
+      }
+      .menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: static;
+      }
+      .stage { min-height: 420px; }
+      .card { min-height: 340px; border-radius: 30px; }
+      .category-btn { flex: 1 1 auto; }
+      .action { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>Connection Cards</h1>
+        <p class="subtitle">Pick a category, draw a card, and keep the conversation going.</p>
+      </div>
+      <div class="pill" id="totalPill">140 cards</div>
+    </header>
+
+    <div class="content">
+      <nav class="menu" id="categoryMenu"></nav>
+
+      <section class="stage">
+        <article class="card">
+          <div class="meta">
+            <span id="categoryLabel"></span>
+            <span id="cardId"></span>
+          </div>
+          <div class="question" id="questionText"></div>
+          <div class="meta">
+            <span id="depthLabel"></span>
+            <span class="depth" id="hearts"></span>
+          </div>
+        </article>
+        <div class="controls">
+          <button class="action icon-action" id="prevBtn" aria-label="Previous card" title="Previous card">←</button>
+          <button class="action primary icon-action" id="nextBtn" aria-label="Next card" title="Next card">→</button>
+          <button class="action" id="shuffleBtn">Shuffle</button>
+          <button class="action" id="skipBtn">Skip Question</button>
+          <button class="action" id="answerBtn">Answer Card</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="answer-panel" id="answerPanel" hidden></section>
+
+    <div class="counter" id="counter"></div>
+  </main>
+
+  <div class="modal-overlay" id="answerModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="answerModalTitle">
+      <h2 id="answerModalTitle">Answer This Card</h2>
+      <p id="answerModalQuestion"></p>
+      <textarea
+        id="answerInput"
+        class="answer-input"
+        placeholder="Type your note here..."
+        maxlength="2000"
+      ></textarea>
+      <div class="modal-actions">
+        <button class="action" id="answerCancelBtn">Cancel</button>
+        <button class="action primary" id="answerSaveBtn">Save Answer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      {
+            "id": 1,
+            "category": "How You See Me",
+            "depth": 2,
+            "question": "If you had to describe me in three words, what would they be?"
+      },
+      {
+            "id": 2,
+            "category": "How You See Me",
+            "depth": 3,
+            "question": "What's one thing I do that you secretly find really attractive but have never told me?"
+      },
+      {
+            "id": 3,
+            "category": "How You See Me",
+            "depth": 3,
+            "question": "What do you think I admire most about you?"
+      },
+      {
+            "id": 4,
+            "category": "How You See Me",
+            "depth": 4,
+            "question": "What do you think I underestimate about myself?"
+      },
+      {
+            "id": 5,
+            "category": "How You See Me",
+            "depth": 1,
+            "question": "If I had a warning label, what would it say?"
+      },
+      {
+            "id": 6,
+            "category": "How You See Me",
+            "depth": 1,
+            "question": "What's one thing I do that makes you think, 'that's so me'?"
+      },
+      {
+            "id": 7,
+            "category": "How You See Me",
+            "depth": 3,
+            "question": "What do you think is my biggest strength that I don't realize?"
+      },
+      {
+            "id": 8,
+            "category": "How You See Me",
+            "depth": 4,
+            "question": "What's something you think people misunderstand about me?"
+      },
+      {
+            "id": 9,
+            "category": "How You See Me",
+            "depth": 4,
+            "question": "What part of my personality do you hope never changes?"
+      },
+      {
+            "id": 10,
+            "category": "How You See Me",
+            "depth": 1,
+            "question": "If you had to give me a nickname based on my personality, what would it be?"
+      },
+      {
+            "id": 11,
+            "category": "How You See Me",
+            "depth": 2,
+            "question": "What do you think I'm most passionate about?"
+      },
+      {
+            "id": 12,
+            "category": "How You See Me",
+            "depth": 3,
+            "question": "What's one thing I pretend not to care about but actually do?"
+      },
+      {
+            "id": 13,
+            "category": "How You See Me",
+            "depth": 2,
+            "question": "What do you think is my biggest green flag?"
+      },
+      {
+            "id": 14,
+            "category": "How You See Me",
+            "depth": 2,
+            "question": "When do I seem the happiest?"
+      },
+      {
+            "id": 15,
+            "category": "How You See Me",
+            "depth": 3,
+            "question": "If someone asked why you like me, what's the first thing you'd tell them?"
+      },
+      {
+            "id": 16,
+            "category": "How You See Me",
+            "depth": 2,
+            "question": "What do you think I'm naturally gifted at?"
+      },
+      {
+            "id": 17,
+            "category": "How You See Me",
+            "depth": 1,
+            "question": "What's something I do that always makes you smile?"
+      },
+      {
+            "id": 18,
+            "category": "How You See Me",
+            "depth": 1,
+            "question": "If I were famous, what would I be famous for?"
+      },
+      {
+            "id": 19,
+            "category": "How You See Me",
+            "depth": 4,
+            "question": "What's one thing you think makes me completely unique?"
+      },
+      {
+            "id": 20,
+            "category": "How You See Me",
+            "depth": 4,
+            "question": "What's one quality of mine that you hope I never lose?"
+      },
+      {
+            "id": 21,
+            "category": "Us",
+            "depth": 2,
+            "question": "What's something we do better together than anyone else?"
+      },
+      {
+            "id": 22,
+            "category": "Us",
+            "depth": 2,
+            "question": "What's one thing that defines our relationship?"
+      },
+      {
+            "id": 23,
+            "category": "Us",
+            "depth": 1,
+            "question": "If someone made a movie about us, what would the title be?"
+      },
+      {
+            "id": 24,
+            "category": "Us",
+            "depth": 3,
+            "question": "What's our biggest strength as a couple?"
+      },
+      {
+            "id": 25,
+            "category": "Us",
+            "depth": 2,
+            "question": "What's one thing we're surprisingly compatible at?"
+      },
+      {
+            "id": 26,
+            "category": "Us",
+            "depth": 4,
+            "question": "What's something we've overcome that made us stronger?"
+      },
+      {
+            "id": 27,
+            "category": "Us",
+            "depth": 1,
+            "question": "If our relationship had a mascot, what would it be?"
+      },
+      {
+            "id": 28,
+            "category": "Us",
+            "depth": 3,
+            "question": "What's something you hope people notice when they see us together?"
+      },
+      {
+            "id": 29,
+            "category": "Us",
+            "depth": 3,
+            "question": "What do you think makes us different from other couples?"
+      },
+      {
+            "id": 30,
+            "category": "Us",
+            "depth": 1,
+            "question": "If we had our own holiday, what would we celebrate?"
+      },
+      {
+            "id": 31,
+            "category": "Us",
+            "depth": 3,
+            "question": "What's one thing we've created together that you're proud of?"
+      },
+      {
+            "id": 32,
+            "category": "Us",
+            "depth": 4,
+            "question": "What makes us feel like home to each other?"
+      },
+      {
+            "id": 33,
+            "category": "Us",
+            "depth": 4,
+            "question": "What moment made you think, 'we're really becoming us'?"
+      },
+      {
+            "id": 34,
+            "category": "Us",
+            "depth": 2,
+            "question": "What's one thing we never seem to get tired of doing together?"
+      },
+      {
+            "id": 35,
+            "category": "Us",
+            "depth": 2,
+            "question": "If our relationship had a motto, what would it be?"
+      },
+      {
+            "id": 36,
+            "category": "Us",
+            "depth": 5,
+            "question": "What's something we should protect no matter how busy life gets?"
+      },
+      {
+            "id": 37,
+            "category": "Us",
+            "depth": 3,
+            "question": "What do you think we're really good at as a team?"
+      },
+      {
+            "id": 38,
+            "category": "Us",
+            "depth": 2,
+            "question": "If you had to describe our relationship using only a food, what would it be and why?"
+      },
+      {
+            "id": 39,
+            "category": "Us",
+            "depth": 4,
+            "question": "What's one thing you hope never changes about us?"
+      },
+      {
+            "id": 40,
+            "category": "Us",
+            "depth": 5,
+            "question": "What part of our relationship makes you feel the most loved?"
+      },
+      {
+            "id": 41,
+            "category": "Remember When",
+            "depth": 1,
+            "question": "What's the first thing you noticed about me?"
+      },
+      {
+            "id": 42,
+            "category": "Remember When",
+            "depth": 2,
+            "question": "When did you realize I was different from everyone else?"
+      },
+      {
+            "id": 43,
+            "category": "Remember When",
+            "depth": 2,
+            "question": "What's the funniest thing that's ever happened to us?"
+      },
+      {
+            "id": 44,
+            "category": "Remember When",
+            "depth": 2,
+            "question": "What's one date you'll never forget?"
+      },
+      {
+            "id": 45,
+            "category": "Remember When",
+            "depth": 2,
+            "question": "When have you laughed the hardest with me?"
+      },
+      {
+            "id": 46,
+            "category": "Remember When",
+            "depth": 3,
+            "question": "What's one little moment that became a big memory?"
+      },
+      {
+            "id": 47,
+            "category": "Remember When",
+            "depth": 3,
+            "question": "What's something I said that has always stuck with you?"
+      },
+      {
+            "id": 48,
+            "category": "Remember When",
+            "depth": 2,
+            "question": "What's one trip or outing you'd love to relive?"
+      },
+      {
+            "id": 49,
+            "category": "Remember When",
+            "depth": 3,
+            "question": "What's one picture of us that tells a whole story?"
+      },
+      {
+            "id": 50,
+            "category": "Remember When",
+            "depth": 4,
+            "question": "What's one moment where you felt really proud of us?"
+      },
+      {
+            "id": 51,
+            "category": "Remember When",
+            "depth": 2,
+            "question": "What's one unexpected memory that still makes you smile?"
+      },
+      {
+            "id": 52,
+            "category": "Remember When",
+            "depth": 4,
+            "question": "What's the sweetest thing I've ever done for you?"
+      },
+      {
+            "id": 53,
+            "category": "Remember When",
+            "depth": 4,
+            "question": "What's one memory you hope we never forget?"
+      },
+      {
+            "id": 54,
+            "category": "Remember When",
+            "depth": 4,
+            "question": "What's one memory you wish had lasted a little longer?"
+      },
+      {
+            "id": 55,
+            "category": "Remember When",
+            "depth": 5,
+            "question": "When did we first start feeling like a team?"
+      },
+      {
+            "id": 56,
+            "category": "Remember When",
+            "depth": 3,
+            "question": "What's one ordinary day together that turned into a favorite memory?"
+      },
+      {
+            "id": 57,
+            "category": "Remember When",
+            "depth": 5,
+            "question": "If we could relive one moment from our relationship exactly as it happened, which one would you choose?"
+      },
+      {
+            "id": 58,
+            "category": "Remember When",
+            "depth": 5,
+            "question": "If we could step back into one conversation we've had, which one would it be?"
+      },
+      {
+            "id": 59,
+            "category": "Remember When",
+            "depth": 3,
+            "question": "What's a random moment with me that pops into your head more often than you'd expect?"
+      },
+      {
+            "id": 60,
+            "category": "Remember When",
+            "depth": 4,
+            "question": "What's one memory of us that you think you'll still smile about when we're old?"
+      },
+      {
+            "id": 61,
+            "category": "Future",
+            "depth": 2,
+            "question": "What's one place you dream of visiting with me?"
+      },
+      {
+            "id": 62,
+            "category": "Future",
+            "depth": 2,
+            "question": "What's something you'd love for us to learn together?"
+      },
+      {
+            "id": 63,
+            "category": "Future",
+            "depth": 3,
+            "question": "What's one goal you'd love for us to accomplish together?"
+      },
+      {
+            "id": 64,
+            "category": "Future",
+            "depth": 3,
+            "question": "Where do you picture us five years from now?"
+      },
+      {
+            "id": 65,
+            "category": "Future",
+            "depth": 2,
+            "question": "What's something you hope we'll laugh about in the future?"
+      },
+      {
+            "id": 66,
+            "category": "Future",
+            "depth": 2,
+            "question": "If money wasn't a factor, what would we do next year?"
+      },
+      {
+            "id": 67,
+            "category": "Future",
+            "depth": 4,
+            "question": "What's one tradition you hope our family has someday?"
+      },
+      {
+            "id": 68,
+            "category": "Future",
+            "depth": 2,
+            "question": "What adventure should we plan before the end of the year?"
+      },
+      {
+            "id": 69,
+            "category": "Future",
+            "depth": 4,
+            "question": "What's something you hope we never stop doing together?"
+      },
+      {
+            "id": 70,
+            "category": "Future",
+            "depth": 2,
+            "question": "If we built our dream home, what feature would be non-negotiable?"
+      },
+      {
+            "id": 71,
+            "category": "Future",
+            "depth": 3,
+            "question": "What's something you hope we'll teach each other?"
+      },
+      {
+            "id": 72,
+            "category": "Future",
+            "depth": 2,
+            "question": "What's one new hobby we should try together?"
+      },
+      {
+            "id": 73,
+            "category": "Future",
+            "depth": 2,
+            "question": "What's one spontaneous trip we should take?"
+      },
+      {
+            "id": 74,
+            "category": "Future",
+            "depth": 4,
+            "question": "What's one dream you've never shared with me before?"
+      },
+      {
+            "id": 75,
+            "category": "Future",
+            "depth": 3,
+            "question": "What's something you hope we'll celebrate together someday?"
+      },
+      {
+            "id": 76,
+            "category": "Future",
+            "depth": 5,
+            "question": "What's one thing you hope future us thanks current us for?"
+      },
+      {
+            "id": 77,
+            "category": "Future",
+            "depth": 3,
+            "question": "What's one challenge you think we'll conquer together?"
+      },
+      {
+            "id": 78,
+            "category": "Future",
+            "depth": 5,
+            "question": "What kind of life do you hope we've built together in twenty years?"
+      },
+      {
+            "id": 79,
+            "category": "Future",
+            "depth": 4,
+            "question": "What's one dream you hope we never give up on?"
+      },
+      {
+            "id": 80,
+            "category": "Future",
+            "depth": 5,
+            "question": "If we could guarantee one amazing experience together, what would you choose?"
+      },
+      {
+            "id": 81,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If we were a sitcom couple, what would our running joke be?"
+      },
+      {
+            "id": 82,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "Which one of us would survive longer on a deserted island?"
+      },
+      {
+            "id": 83,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If we swapped lives for a day, what would surprise us the most?"
+      },
+      {
+            "id": 84,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "What ridiculous business would we accidentally start together?"
+      },
+      {
+            "id": 85,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If we had to compete on a reality show, which one would we win?"
+      },
+      {
+            "id": 86,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "Which fictional couple are we most like?"
+      },
+      {
+            "id": 87,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If we had a signature dance move, what would it look like?"
+      },
+      {
+            "id": 88,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "What food perfectly represents my personality?"
+      },
+      {
+            "id": 89,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If we could only communicate using movie quotes for a day, who would struggle first?"
+      },
+      {
+            "id": 90,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "What harmless thing would we probably get banned from doing?"
+      },
+      {
+            "id": 91,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If our pets could talk, what would they complain about most?"
+      },
+      {
+            "id": 92,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "What would our pirate names be?"
+      },
+      {
+            "id": 93,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If we switched wardrobes for a week, who would complain first?"
+      },
+      {
+            "id": 94,
+            "category": "Fun & Silly",
+            "depth": 1,
+            "question": "If our relationship had a mascot costume, what would it be?"
+      },
+      {
+            "id": 95,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "What's the weirdest thing we'd become unexpectedly competitive about?"
+      },
+      {
+            "id": 96,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "If aliens secretly watched us for a week, what would confuse them the most?"
+      },
+      {
+            "id": 97,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "If we had to switch voices for a day, who would have more fun?"
+      },
+      {
+            "id": 98,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "If our life together became a board game, what would the goal be?"
+      },
+      {
+            "id": 99,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "If we could instantly become experts at one completely random skill, what should it be?"
+      },
+      {
+            "id": 100,
+            "category": "Fun & Silly",
+            "depth": 2,
+            "question": "If our friends had to roast us as a couple, what would they say?"
+      },
+      {
+            "id": 101,
+            "category": "Appreciation",
+            "depth": 1,
+            "question": "What's one small thing I do that makes you feel appreciated?"
+      },
+      {
+            "id": 102,
+            "category": "Appreciation",
+            "depth": 2,
+            "question": "What's something about me you'll never take for granted?"
+      },
+      {
+            "id": 103,
+            "category": "Appreciation",
+            "depth": 2,
+            "question": "When do you feel the most supported by me?"
+      },
+      {
+            "id": 104,
+            "category": "Appreciation",
+            "depth": 2,
+            "question": "What's one compliment from me you'll never forget?"
+      },
+      {
+            "id": 105,
+            "category": "Appreciation",
+            "depth": 3,
+            "question": "What's something I've helped you become better at?"
+      },
+      {
+            "id": 106,
+            "category": "Appreciation",
+            "depth": 2,
+            "question": "What's something I do that makes your life easier?"
+      },
+      {
+            "id": 107,
+            "category": "Appreciation",
+            "depth": 3,
+            "question": "What's one way I make you feel understood?"
+      },
+      {
+            "id": 108,
+            "category": "Appreciation",
+            "depth": 3,
+            "question": "What's one quality of mine that inspires you?"
+      },
+      {
+            "id": 109,
+            "category": "Appreciation",
+            "depth": 3,
+            "question": "When do you feel the luckiest to have me?"
+      },
+      {
+            "id": 110,
+            "category": "Appreciation",
+            "depth": 2,
+            "question": "What's something I do that deserves more appreciation than it gets?"
+      },
+      {
+            "id": 111,
+            "category": "Appreciation",
+            "depth": 4,
+            "question": "What's one thing you hope I always know about how you feel?"
+      },
+      {
+            "id": 112,
+            "category": "Appreciation",
+            "depth": 4,
+            "question": "What's something you've learned from loving me?"
+      },
+      {
+            "id": 113,
+            "category": "Appreciation",
+            "depth": 3,
+            "question": "What makes you feel proud to be with me?"
+      },
+      {
+            "id": 114,
+            "category": "Appreciation",
+            "depth": 2,
+            "question": "What's something I do that always helps you feel calm?"
+      },
+      {
+            "id": 115,
+            "category": "Appreciation",
+            "depth": 3,
+            "question": "What's one thing I consistently do that never goes unnoticed?"
+      },
+      {
+            "id": 116,
+            "category": "Appreciation",
+            "depth": 4,
+            "question": "What part of loving me has surprised you the most?"
+      },
+      {
+            "id": 117,
+            "category": "Appreciation",
+            "depth": 5,
+            "question": "What's one way I've changed your life for the better?"
+      },
+      {
+            "id": 118,
+            "category": "Appreciation",
+            "depth": 4,
+            "question": "What's something you admire about me that you don't say often enough?"
+      },
+      {
+            "id": 119,
+            "category": "Appreciation",
+            "depth": 5,
+            "question": "When have you felt the most loved by me?"
+      },
+      {
+            "id": 120,
+            "category": "Appreciation",
+            "depth": 5,
+            "question": "If you had to thank me for one thing, what would it be?"
+      },
+      {
+            "id": 121,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's something I do that instantly gives you butterflies?"
+      },
+      {
+            "id": 122,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's your favorite way for me to kiss you?"
+      },
+      {
+            "id": 123,
+            "category": "Intimate & Flirty",
+            "depth": 1,
+            "question": "What's something I wear that you secretly love?"
+      },
+      {
+            "id": 124,
+            "category": "Intimate & Flirty",
+            "depth": 3,
+            "question": "When have you found me the most irresistible?"
+      },
+      {
+            "id": 125,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's something completely innocent that I do that's unexpectedly attractive?"
+      },
+      {
+            "id": 126,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's your favorite memory of us cuddling?"
+      },
+      {
+            "id": 127,
+            "category": "Intimate & Flirty",
+            "depth": 1,
+            "question": "Where's your favorite place for me to hold your hand?"
+      },
+      {
+            "id": 128,
+            "category": "Intimate & Flirty",
+            "depth": 3,
+            "question": "What's one thing you wish we did more often when we're alone?"
+      },
+      {
+            "id": 129,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's something I do that always makes you blush?"
+      },
+      {
+            "id": 130,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's one compliment from me you'll never get tired of hearing?"
+      },
+      {
+            "id": 131,
+            "category": "Intimate & Flirty",
+            "depth": 3,
+            "question": "What's something you've wanted to tell me in the moment but held back?"
+      },
+      {
+            "id": 132,
+            "category": "Intimate & Flirty",
+            "depth": 4,
+            "question": "What part of our chemistry feels the strongest?"
+      },
+      {
+            "id": 133,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's your favorite kind of date night with me?"
+      },
+      {
+            "id": 134,
+            "category": "Intimate & Flirty",
+            "depth": 3,
+            "question": "If we had an uninterrupted weekend together, how would you want to spend it?"
+      },
+      {
+            "id": 135,
+            "category": "Intimate & Flirty",
+            "depth": 2,
+            "question": "What's one little touch from me that always gets your attention?"
+      },
+      {
+            "id": 136,
+            "category": "Intimate & Flirty",
+            "depth": 4,
+            "question": "What's one thing you think is incredibly attractive about my personality?"
+      },
+      {
+            "id": 137,
+            "category": "Intimate & Flirty",
+            "depth": 3,
+            "question": "What's one moment when you couldn't stop smiling because of me?"
+      },
+      {
+            "id": 138,
+            "category": "Intimate & Flirty",
+            "depth": 4,
+            "question": "What's one thing you hope I never stop doing when we're together?"
+      },
+      {
+            "id": 139,
+            "category": "Intimate & Flirty",
+            "depth": 5,
+            "question": "If you could pause time during one romantic moment we've shared, which moment would you choose?"
+      },
+      {
+            "id": 140,
+            "category": "Intimate & Flirty",
+            "depth": 5,
+            "question": "What's one romantic moment you hope we create together someday?"
+      },
+      {
+            "id": 141,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "What's something you want me to understand about you more deeply?"
+      },
+      {
+            "id": 142,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one fear you have about love that you don't talk about often?"
+      },
+      {
+            "id": 143,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "When do you feel the most emotionally safe with me?"
+      },
+      {
+            "id": 144,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one thing you wish was easier for you to say out loud?"
+      },
+      {
+            "id": 145,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "What's something you need more reassurance about than people realize?"
+      },
+      {
+            "id": 146,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one part of your past that still shapes how you love?"
+      },
+      {
+            "id": 147,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "What's something I do that helps you let your guard down?"
+      },
+      {
+            "id": 148,
+            "category": "Vulnerable & Honest",
+            "depth": 5,
+            "question": "What's one truth about you that you hope I always handle gently?"
+      },
+      {
+            "id": 149,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's something you're still learning how to receive from me?"
+      },
+      {
+            "id": 150,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "When do you feel most understood by me?"
+      },
+      {
+            "id": 151,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one thing you wish people knew about the way you love?"
+      },
+      {
+            "id": 152,
+            "category": "Vulnerable & Honest",
+            "depth": 5,
+            "question": "What's one insecurity that feels smaller when you're with me?"
+      },
+      {
+            "id": 153,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "What's something you want us to get better at talking about?"
+      },
+      {
+            "id": 154,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one emotional need you're trying to express more clearly?"
+      },
+      {
+            "id": 155,
+            "category": "Vulnerable & Honest",
+            "depth": 5,
+            "question": "What's one thing you hope I never judge you for?"
+      },
+      {
+            "id": 156,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one way I can love you better when you're having a hard day?"
+      },
+      {
+            "id": 157,
+            "category": "Vulnerable & Honest",
+            "depth": 3,
+            "question": "What's something that makes you feel chosen?"
+      },
+      {
+            "id": 158,
+            "category": "Vulnerable & Honest",
+            "depth": 5,
+            "question": "What's one conversation you've been nervous to have but still want to have someday?"
+      },
+      {
+            "id": 159,
+            "category": "Vulnerable & Honest",
+            "depth": 4,
+            "question": "What's one thing about our relationship that has helped you heal?"
+      },
+      {
+            "id": 160,
+            "category": "Vulnerable & Honest",
+            "depth": 5,
+            "question": "What's one promise you hope we keep making to each other?"
+      },
+      {
+            "id": 161,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Cozy night in or spontaneous night out?"
+      },
+      {
+            "id": 162,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Beach trip together or mountain cabin together?"
+      },
+      {
+            "id": 163,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Fancy dinner date or messy takeout on the couch?"
+      },
+      {
+            "id": 164,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Slow dancing in the kitchen or singing loudly in the car?"
+      },
+      {
+            "id": 165,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Planned vacation or surprise getaway?"
+      },
+      {
+            "id": 166,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Matching pajamas or matching tattoos?"
+      },
+      {
+            "id": 167,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Morning cuddles or late-night talks?"
+      },
+      {
+            "id": 168,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Cooking together or ordering our favorites?"
+      },
+      {
+            "id": 169,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Cute couple photos or funny couple photos?"
+      },
+      {
+            "id": 170,
+            "category": "This or That",
+            "depth": 1,
+            "question": "Love letter or surprise playlist?"
+      },
+      {
+            "id": 171,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Relive our first date or preview one day from our future?"
+      },
+      {
+            "id": 172,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Road trip with no plan or perfect itinerary?"
+      },
+      {
+            "id": 173,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Double date or just us forever?"
+      },
+      {
+            "id": 174,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Big romantic gesture or tiny thoughtful habit?"
+      },
+      {
+            "id": 175,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Adopt a weird pet or start a weird tradition?"
+      },
+      {
+            "id": 176,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Build a dream house or travel the world together?"
+      },
+      {
+            "id": 177,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Win a game together or lose while laughing the whole time?"
+      },
+      {
+            "id": 178,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Be known as the cute couple or the funny couple?"
+      },
+      {
+            "id": 179,
+            "category": "This or That",
+            "depth": 2,
+            "question": "One unforgettable adventure or a hundred perfect ordinary days?"
+      },
+      {
+            "id": 180,
+            "category": "This or That",
+            "depth": 2,
+            "question": "Grow old somewhere quiet or keep chasing new places forever?"
+      }
+];
+
+    const ANSWERS_KEY = "connectionCardsAnswersV1";
+    const SKIPPED_KEY = "connectionCardsSkippedV1";
+    const SKIPPED_CATEGORY = "Skipped";
+    const ANSWERED_CATEGORY = "Answered";
+    const categories = ["All", ...new Set(cards.map(card => card.category)), SKIPPED_CATEGORY, ANSWERED_CATEGORY];
+    let activeCategory = "All";
+    let currentDeck = [];
+    let currentIndex = 0;
+
+    const menu = document.getElementById("categoryMenu");
+    const categoryLabel = document.getElementById("categoryLabel");
+    const cardId = document.getElementById("cardId");
+    const questionText = document.getElementById("questionText");
+    const depthLabel = document.getElementById("depthLabel");
+    const hearts = document.getElementById("hearts");
+    const counter = document.getElementById("counter");
+    const totalPill = document.getElementById("totalPill");
+    const skipBtn = document.getElementById("skipBtn");
+    const answerBtn = document.getElementById("answerBtn");
+    const answerPanel = document.getElementById("answerPanel");
+    const answerModal = document.getElementById("answerModal");
+    const answerModalQuestion = document.getElementById("answerModalQuestion");
+    const answerInput = document.getElementById("answerInput");
+    const answerCancelBtn = document.getElementById("answerCancelBtn");
+    const answerSaveBtn = document.getElementById("answerSaveBtn");
+    const rootStyle = document.documentElement.style;
+    let answersById = loadAnswers();
+    let skippedIds = loadSkipped();
+    let modalCardId = null;
+
+    const categoryThemes = {
+      "All": {
+        bg1: "#ffedf6",
+        bg2: "#efe7ff",
+        spot1: "rgba(255,255,255,.9)",
+        spot2: "rgba(255,204,231,.85)",
+        ink: "#2c1733",
+        muted: "#7e6687",
+        card: "rgba(255,255,255,.82)",
+        accent: "#c44f92",
+        accent2: "#7c4dff",
+        glow: "rgba(196,79,146,.22)",
+        shadow: "0 24px 70px rgba(84, 36, 92, .22)"
+      },
+      "How You See Me": {
+        bg1: "#fff1da",
+        bg2: "#ffe8f2",
+        spot1: "rgba(255,255,255,.9)",
+        spot2: "rgba(255,187,219,.72)",
+        ink: "#352022",
+        muted: "#7f5f61",
+        card: "rgba(255,255,255,.84)",
+        accent: "#ff7f6b",
+        accent2: "#d66bff",
+        glow: "rgba(255,127,107,.22)",
+        shadow: "0 24px 70px rgba(121, 55, 85, .24)"
+      },
+      "Us": {
+        bg1: "#ecfff5",
+        bg2: "#e8f5ff",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(142,226,255,.65)",
+        ink: "#193331",
+        muted: "#4f7671",
+        card: "rgba(255,255,255,.85)",
+        accent: "#17b890",
+        accent2: "#3a86ff",
+        glow: "rgba(23,184,144,.24)",
+        shadow: "0 24px 70px rgba(24, 94, 106, .22)"
+      },
+      "Remember When": {
+        bg1: "#f7f0ff",
+        bg2: "#f3e7ff",
+        spot1: "rgba(255,255,255,.9)",
+        spot2: "rgba(214,178,255,.6)",
+        ink: "#2c2140",
+        muted: "#685b84",
+        card: "rgba(255,255,255,.84)",
+        accent: "#9d4edd",
+        accent2: "#5a189a",
+        glow: "rgba(157,78,221,.24)",
+        shadow: "0 24px 70px rgba(82, 44, 118, .24)"
+      },
+      "Future": {
+        bg1: "#edf6ff",
+        bg2: "#ecfff7",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(132,214,255,.65)",
+        ink: "#173044",
+        muted: "#5c7486",
+        card: "rgba(255,255,255,.84)",
+        accent: "#2a9d8f",
+        accent2: "#3a86ff",
+        glow: "rgba(58,134,255,.22)",
+        shadow: "0 24px 70px rgba(34, 94, 132, .24)"
+      },
+      "Fun & Silly": {
+        bg1: "#fff7dc",
+        bg2: "#ffe9ef",
+        spot1: "rgba(255,255,255,.9)",
+        spot2: "rgba(255,181,112,.55)",
+        ink: "#372a1b",
+        muted: "#7f6a53",
+        card: "rgba(255,255,255,.85)",
+        accent: "#ff9f1c",
+        accent2: "#ff4d8d",
+        glow: "rgba(255,159,28,.25)",
+        shadow: "0 24px 70px rgba(146, 85, 40, .24)"
+      },
+      "Appreciation": {
+        bg1: "#fff6eb",
+        bg2: "#fff9f1",
+        spot1: "rgba(255,255,255,.9)",
+        spot2: "rgba(255,222,163,.58)",
+        ink: "#3a2e1f",
+        muted: "#8a7458",
+        card: "rgba(255,255,255,.86)",
+        accent: "#f4a261",
+        accent2: "#e76f51",
+        glow: "rgba(244,162,97,.24)",
+        shadow: "0 24px 70px rgba(132, 88, 46, .22)"
+      },
+      "Intimate & Flirty": {
+        bg1: "#ffe8f4",
+        bg2: "#f0e8ff",
+        spot1: "rgba(255,255,255,.9)",
+        spot2: "rgba(255,155,206,.58)",
+        ink: "#351a30",
+        muted: "#7c5b78",
+        card: "rgba(255,255,255,.84)",
+        accent: "#ff4d8d",
+        accent2: "#8f5bff",
+        glow: "rgba(255,77,141,.25)",
+        shadow: "0 24px 70px rgba(112, 46, 108, .24)"
+      },
+      "Vulnerable & Honest": {
+        bg1: "#eaf6ff",
+        bg2: "#efeaff",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(168,198,255,.58)",
+        ink: "#1f2a44",
+        muted: "#5d6988",
+        card: "rgba(255,255,255,.86)",
+        accent: "#4f79ff",
+        accent2: "#7a5cff",
+        glow: "rgba(79,121,255,.24)",
+        shadow: "0 24px 70px rgba(56, 73, 126, .24)"
+      },
+      "This or That": {
+        bg1: "#fff3df",
+        bg2: "#ffe8ef",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(255,172,138,.58)",
+        ink: "#3f281f",
+        muted: "#8a665a",
+        card: "rgba(255,255,255,.86)",
+        accent: "#ff7a59",
+        accent2: "#ff4d8d",
+        glow: "rgba(255,122,89,.24)",
+        shadow: "0 24px 70px rgba(125, 74, 62, .24)"
+      },
+      "Skipped": {
+        bg1: "#f3f0ff",
+        bg2: "#eef3ff",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(180,190,255,.55)",
+        ink: "#2a2640",
+        muted: "#6b6785",
+        card: "rgba(255,255,255,.86)",
+        accent: "#6c63ff",
+        accent2: "#9b8cff",
+        glow: "rgba(108,99,255,.24)",
+        shadow: "0 24px 70px rgba(62, 58, 112, .22)"
+      },
+      "Answered": {
+        bg1: "#e9fff5",
+        bg2: "#e9f8ff",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(130,230,193,.5)",
+        ink: "#173229",
+        muted: "#4e7a69",
+        card: "rgba(255,255,255,.86)",
+        accent: "#1f9d78",
+        accent2: "#2f80ed",
+        glow: "rgba(31,157,120,.25)",
+        shadow: "0 24px 70px rgba(33, 101, 84, .22)"
+      }
+    };
+
+    function loadAnswers() {
+      try {
+        const raw = localStorage.getItem(ANSWERS_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (_error) {
+        return {};
+      }
+    }
+
+    function persistAnswers() {
+      localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersById));
+    }
+
+    function loadSkipped() {
+      try {
+        const raw = localStorage.getItem(SKIPPED_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function persistSkipped() {
+      localStorage.setItem(SKIPPED_KEY, JSON.stringify(skippedIds));
+    }
+
+    function getAnswer(cardId) {
+      return answersById[String(cardId)] || "";
+    }
+
+    function isAnswered(cardId) {
+      return getAnswer(cardId).trim().length > 0;
+    }
+
+    function isSkipped(cardId) {
+      return skippedIds.includes(Number(cardId));
+    }
+
+    function skipCard(cardId) {
+      const id = Number(cardId);
+      if (!skippedIds.includes(id)) {
+        skippedIds.push(id);
+        persistSkipped();
+      }
+    }
+
+    function unskipCard(cardId) {
+      const id = Number(cardId);
+      skippedIds = skippedIds.filter(skippedId => skippedId !== id);
+      persistSkipped();
+    }
+
+    function getDeckForCategory(category) {
+      if (category === ANSWERED_CATEGORY) {
+        return cards.filter(card => isAnswered(card.id));
+      }
+
+      if (category === SKIPPED_CATEGORY) {
+        return cards.filter(card => isSkipped(card.id) && !isAnswered(card.id));
+      }
+
+      const availableCards = cards.filter(card => !isAnswered(card.id) && !isSkipped(card.id));
+      return category === "All"
+        ? availableCards
+        : availableCards.filter(card => card.category === category);
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderAnswerPanel(card) {
+      if (activeCategory !== ANSWERED_CATEGORY || !card) {
+        answerPanel.hidden = true;
+        answerPanel.innerHTML = "";
+        return;
+      }
+
+      answerPanel.hidden = false;
+      answerPanel.innerHTML = `
+        <p class="answer-title">Saved Answer</p>
+        <p class="answer-text">${escapeHtml(getAnswer(card.id))}</p>
+        <div class="controls">
+          <button class="action danger" id="deleteAnswerBtn">Delete Answer</button>
+        </div>
+      `;
+
+      const deleteBtn = document.getElementById("deleteAnswerBtn");
+      deleteBtn.addEventListener("click", () => {
+        delete answersById[String(card.id)];
+        persistAnswers();
+
+        currentDeck = getDeckForCategory(activeCategory);
+        currentIndex = Math.min(currentIndex, Math.max(0, currentDeck.length - 1));
+
+        if (currentDeck.length === 0) {
+          activeCategory = "All";
+          applyTheme(activeCategory);
+          currentDeck = getDeckForCategory(activeCategory);
+          currentIndex = 0;
+        }
+
+        renderMenu();
+        renderCard();
+      });
+    }
+
+    function openAnswerModal(card) {
+      modalCardId = card.id;
+      answerModalQuestion.textContent = `Card #${card.id}: ${card.question}`;
+      answerInput.value = getAnswer(card.id);
+      answerModal.hidden = false;
+      answerInput.focus();
+    }
+
+    function closeAnswerModal() {
+      answerModal.hidden = true;
+      modalCardId = null;
+      answerInput.value = "";
+      answerModalQuestion.textContent = "";
+    }
+
+    function saveModalAnswer() {
+      if (modalCardId === null) return;
+
+      const trimmedAnswer = answerInput.value.trim();
+      if (!trimmedAnswer) {
+        window.alert("Please enter a note to save this answer.");
+        return;
+      }
+
+      answersById[String(modalCardId)] = trimmedAnswer;
+      persistAnswers();
+      unskipCard(modalCardId);
+      closeAnswerModal();
+
+      currentDeck = getDeckForCategory(activeCategory);
+      currentIndex = Math.min(currentIndex, Math.max(0, currentDeck.length - 1));
+
+      renderMenu();
+      renderCard();
+    }
+
+    function applyTheme(category) {
+      const theme = categoryThemes[category] || categoryThemes.All;
+      rootStyle.setProperty("--bg1", theme.bg1);
+      rootStyle.setProperty("--bg2", theme.bg2);
+      rootStyle.setProperty("--spot1", theme.spot1);
+      rootStyle.setProperty("--spot2", theme.spot2);
+      rootStyle.setProperty("--ink", theme.ink);
+      rootStyle.setProperty("--muted", theme.muted);
+      rootStyle.setProperty("--card", theme.card);
+      rootStyle.setProperty("--accent", theme.accent);
+      rootStyle.setProperty("--accent2", theme.accent2);
+      rootStyle.setProperty("--glow", theme.glow);
+      rootStyle.setProperty("--shadow", theme.shadow);
+    }
+
+    function renderMenu() {
+      menu.innerHTML = "";
+      categories.forEach(category => {
+        const btn = document.createElement("button");
+        btn.className = "category-btn" + (category === activeCategory ? " active" : "");
+        btn.textContent = category;
+        btn.addEventListener("click", () => {
+          activeCategory = category;
+          currentDeck = getDeckForCategory(category);
+          currentIndex = 0;
+          applyTheme(category);
+          renderMenu();
+          renderCard();
+        });
+        menu.appendChild(btn);
+      });
+    }
+
+    function renderCard() {
+      const card = currentDeck[currentIndex];
+
+      const inAnswered = activeCategory === ANSWERED_CATEGORY;
+      const inSkipped = activeCategory === SKIPPED_CATEGORY;
+      answerBtn.style.display = inAnswered ? "none" : "inline-block";
+      skipBtn.style.display = inAnswered || inSkipped ? "none" : "inline-block";
+
+      if (!card) {
+        categoryLabel.textContent = inAnswered
+          ? "Answered Cards"
+          : inSkipped
+            ? "Skipped Cards"
+            : "No Cards Left";
+        cardId.textContent = "";
+        questionText.textContent = inAnswered
+          ? "No answered cards yet."
+          : inSkipped
+            ? "No skipped cards yet."
+            : "Every card in this category has been answered or skipped.";
+        depthLabel.textContent = "";
+        hearts.textContent = "";
+        counter.textContent = `0 cards in ${activeCategory}`;
+        totalPill.textContent = "0 cards";
+        renderAnswerPanel(null);
+        return;
+      }
+
+      categoryLabel.textContent = card.category;
+      cardId.textContent = `Card #${card.id}`;
+      questionText.textContent = card.question;
+      depthLabel.textContent = `Depth ${card.depth}`;
+      hearts.textContent = "♥".repeat(card.depth);
+      counter.textContent = `${currentIndex + 1} of ${currentDeck.length} in ${activeCategory}`;
+      totalPill.textContent = `${currentDeck.length} cards`;
+      renderAnswerPanel(card);
+    }
+
+    function nextCard() {
+      if (currentDeck.length === 0) return;
+      currentIndex = (currentIndex + 1) % currentDeck.length;
+      renderCard();
+    }
+
+    function previousCard() {
+      if (currentDeck.length === 0) return;
+      currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+      renderCard();
+    }
+
+    function shuffleDeck() {
+      if (currentDeck.length === 0) return;
+      for (let i = currentDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+      }
+      currentIndex = 0;
+      renderCard();
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", nextCard);
+    document.getElementById("prevBtn").addEventListener("click", previousCard);
+    document.getElementById("shuffleBtn").addEventListener("click", shuffleDeck);
+    skipBtn.addEventListener("click", () => {
+      const card = currentDeck[currentIndex];
+      if (!card || activeCategory === ANSWERED_CATEGORY || activeCategory === SKIPPED_CATEGORY) return;
+
+      skipCard(card.id);
+
+      currentDeck = getDeckForCategory(activeCategory);
+      currentIndex = Math.min(currentIndex, Math.max(0, currentDeck.length - 1));
+
+      renderMenu();
+      renderCard();
+    });
+    answerBtn.addEventListener("click", () => {
+      const card = currentDeck[currentIndex];
+      if (!card || activeCategory === ANSWERED_CATEGORY) return;
+      openAnswerModal(card);
+    });
+
+    answerCancelBtn.addEventListener("click", closeAnswerModal);
+    answerSaveBtn.addEventListener("click", saveModalAnswer);
+    answerModal.addEventListener("click", event => {
+      if (event.target === answerModal) closeAnswerModal();
+    });
+    answerInput.addEventListener("keydown", event => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "enter") {
+        saveModalAnswer();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !answerModal.hidden) {
+        closeAnswerModal();
+        return;
+      }
+
+      const targetTag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
+      if (targetTag === "textarea" || targetTag === "input") return;
+      if (!answerModal.hidden) return;
+
+      if (event.key === "ArrowRight" || event.key === " ") nextCard();
+      if (event.key === "ArrowLeft") previousCard();
+      if (event.key.toLowerCase() === "s") shuffleDeck();
+    });
+
+    currentDeck = getDeckForCategory(activeCategory);
+    applyTheme(activeCategory);
+    renderMenu();
+    renderCard();
+  </script>
+</body>
+</html>
