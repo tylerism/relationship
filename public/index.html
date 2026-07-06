@@ -333,6 +333,25 @@
       color: var(--muted);
     }
 
+    .card.action-card .question::before {
+      content: "Do this together";
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .card-type {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent2);
+    }
+
     .sync-status.error {
       color: #c62828;
     }
@@ -347,7 +366,7 @@
     <header>
       <div>
         <h1>Connection Cards</h1>
-        <p class="subtitle">Pick a category, draw a card, and keep the conversation going.</p>
+        <p class="subtitle">Pick a category, draw a card, answer questions or complete actions together.</p>
       </div>
       <div class="room-bar">
         <div class="pill" id="totalPill">140 cards</div>
@@ -361,10 +380,10 @@
       <nav class="menu" id="categoryMenu"></nav>
 
       <section class="stage">
-        <article class="card">
+        <article class="card" id="cardSurface">
           <div class="meta">
             <span id="categoryLabel"></span>
-            <span id="cardId"></span>
+            <span id="cardMeta"></span>
           </div>
           <div class="question" id="questionText"></div>
           <div class="meta">
@@ -1485,6 +1504,266 @@
             "category": "This or That",
             "depth": 2,
             "question": "Grow old somewhere quiet or keep chasing new places forever?"
+      },
+      {
+            "id": 181,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "What's something slightly taboo you've fantasized about doing with me but haven't brought up yet?"
+      },
+      {
+            "id": 182,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "Is there a place outside the bedroom where the risk of getting caught actually excites you?"
+      },
+      {
+            "id": 183,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "What's one thing you've seen or read that made you think, 'I want to try that with you'?"
+      },
+      {
+            "id": 184,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "Would you rather take full control for a night or surrender it completely—and what would that look like?"
+      },
+      {
+            "id": 185,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "What's a nickname or thing to say in the moment that feels a little forbidden but turns you on?"
+      },
+      {
+            "id": 186,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "Is there an outfit, costume, or role-play scenario you'd love me to try for you?"
+      },
+      {
+            "id": 187,
+            "category": "Taboo Desires",
+            "depth": 3,
+            "question": "What's something innocent we already do that you'd secretly want to turn into foreplay?"
+      },
+      {
+            "id": 188,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "How do you feel about blindfolds, light restraints, or being teased before you're allowed to touch?"
+      },
+      {
+            "id": 189,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "What's one boundary we've never talked about that you'd actually be curious to explore together?"
+      },
+      {
+            "id": 190,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "Is there a time or situation—early morning, on vacation, after tension—when wanting me feels especially forbidden?"
+      },
+      {
+            "id": 191,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "What's a fantasy about us that involves quietly breaking one of our own unspoken rules?"
+      },
+      {
+            "id": 192,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "Would you ever want to record or photograph us together, or does that feel like a line you wouldn't cross?"
+      },
+      {
+            "id": 193,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "What's something you want me to whisper to you that you'd never say out loud in daylight?"
+      },
+      {
+            "id": 194,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "Is there a toy or prop you've been curious about bringing into our routine?"
+      },
+      {
+            "id": 195,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "What's something you've done before that you'd love to recreate with me—but make it even better?"
+      },
+      {
+            "id": 196,
+            "category": "Taboo Desires",
+            "depth": 3,
+            "question": "How would you feel about me initiating in a completely unexpected moment—mid-movie, while cooking, etc.?"
+      },
+      {
+            "id": 197,
+            "category": "Taboo Desires",
+            "depth": 4,
+            "question": "What's a sensation—ice, warm oil, a slow massage—you've secretly wanted to explore on each other?"
+      },
+      {
+            "id": 198,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "Is there a power dynamic—strangers, boss and employee, forbidden crush—that secretly does it for you with me?"
+      },
+      {
+            "id": 199,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "What's something we'd do on a 'no judgment' night that we'd never tell anyone about?"
+      },
+      {
+            "id": 200,
+            "category": "Taboo Desires",
+            "depth": 5,
+            "question": "If you had one free pass to request something a little naughty with zero awkwardness, what would it be?"
+      },
+      {
+            "id": 201,
+            "category": "Actions",
+            "type": "action",
+            "depth": 1,
+            "action": "Hold hands and sit in silence together for two full minutes."
+      },
+      {
+            "id": 202,
+            "category": "Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Give each other a slow, genuine hug for at least 60 seconds."
+      },
+      {
+            "id": 203,
+            "category": "Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Stare into each other's eyes without talking for 30 seconds."
+      },
+      {
+            "id": 204,
+            "category": "Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Trade five specific compliments—no repeats, no generic ones."
+      },
+      {
+            "id": 205,
+            "category": "Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Give your partner a three-minute shoulder or back massage."
+      },
+      {
+            "id": 206,
+            "category": "Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Slow dance together for one full song, even if there's no music playing."
+      },
+      {
+            "id": 207,
+            "category": "Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Kiss your partner somewhere you usually don't—neck, wrist, forehead, you choose."
+      },
+      {
+            "id": 208,
+            "category": "Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Whisper something you've been holding back that you want them to hear."
+      },
+      {
+            "id": 209,
+            "category": "Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Feed each other something sweet, bite by bite."
+      },
+      {
+            "id": 210,
+            "category": "Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Trace the outline of your partner's face with your fingertips."
+      },
+      {
+            "id": 211,
+            "category": "Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Pick a song that fits your relationship right now and listen to it together."
+      },
+      {
+            "id": 212,
+            "category": "Actions",
+            "type": "action",
+            "depth": 4,
+            "action": "Recreate your first kiss—or describe in detail how you'd do it if you could relive it."
+      },
+      {
+            "id": 213,
+            "category": "Actions",
+            "type": "action",
+            "depth": 4,
+            "action": "Plan your next date out loud together in the next five minutes—time, place, vibe."
+      },
+      {
+            "id": 214,
+            "category": "Actions",
+            "type": "action",
+            "depth": 4,
+            "action": "Take a photo together that you'd actually want to keep."
+      },
+      {
+            "id": 215,
+            "category": "Actions",
+            "type": "action",
+            "depth": 4,
+            "action": "Commit to sending your partner a flirty or loving message tomorrow morning."
+      },
+      {
+            "id": 216,
+            "category": "Actions",
+            "type": "action",
+            "depth": 4,
+            "action": "Do a seven-minute make-out session—phones away, no interruptions."
+      },
+      {
+            "id": 217,
+            "category": "Actions",
+            "type": "action",
+            "depth": 5,
+            "action": "Blindfold your partner and kiss three different places—let them guess each one."
+      },
+      {
+            "id": 218,
+            "category": "Actions",
+            "type": "action",
+            "depth": 5,
+            "action": "Pick one thing you've been curious to try tonight and initiate it without over-explaining."
+      },
+      {
+            "id": 219,
+            "category": "Actions",
+            "type": "action",
+            "depth": 5,
+            "action": "Take turns giving slow, focused attention to one body part each for two minutes."
+      },
+      {
+            "id": 220,
+            "category": "Actions",
+            "type": "action",
+            "depth": 5,
+            "action": "Share one fantasy out loud tonight—no judgment, just listening."
       }
 ];
 
@@ -1503,7 +1782,9 @@
 
     const menu = document.getElementById("categoryMenu");
     const categoryLabel = document.getElementById("categoryLabel");
-    const cardId = document.getElementById("cardId");
+    const cardMeta = document.getElementById("cardMeta");
+    const cardSurface = document.getElementById("cardSurface");
+    const answerModalTitle = document.getElementById("answerModalTitle");
     const questionText = document.getElementById("questionText");
     const depthLabel = document.getElementById("depthLabel");
     const hearts = document.getElementById("hearts");
@@ -1699,6 +1980,32 @@
         glow: "rgba(255,77,141,.25)",
         shadow: "0 24px 70px rgba(112, 46, 108, .24)"
       },
+      "Taboo Desires": {
+        bg1: "#1c0a12",
+        bg2: "#26101c",
+        spot1: "rgba(255,255,255,.06)",
+        spot2: "rgba(180,60,90,.4)",
+        ink: "#f8e8ee",
+        muted: "#c4a0ad",
+        card: "rgba(45,22,34,.82)",
+        accent: "#e84a6f",
+        accent2: "#9b4dca",
+        glow: "rgba(232,74,111,.28)",
+        shadow: "0 24px 70px rgba(0, 0, 0, .42)"
+      },
+      "Actions": {
+        bg1: "#fff0e8",
+        bg2: "#ffe8f0",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(255,140,120,.45)",
+        ink: "#3a1f24",
+        muted: "#8a5f68",
+        card: "rgba(255,255,255,.86)",
+        accent: "#ff5c5c",
+        accent2: "#ff8c42",
+        glow: "rgba(255,92,92,.24)",
+        shadow: "0 24px 70px rgba(120, 48, 56, .24)"
+      },
       "Vulnerable & Honest": {
         bg1: "#eaf6ff",
         bg2: "#efeaff",
@@ -1752,6 +2059,14 @@
         shadow: "0 24px 70px rgba(33, 101, 84, .22)"
       }
     };
+
+    function isActionCard(card) {
+      return card && card.type === "action";
+    }
+
+    function getCardText(card) {
+      return card.action || card.question || "";
+    }
 
     function getAnswer(cardId) {
       return answersById[String(cardId)] || "";
@@ -1810,11 +2125,14 @@
       }
 
       answerPanel.hidden = false;
+      const completed = isActionCard(card);
+      const saved = getAnswer(card.id);
+      const displayAnswer = completed && saved === "Done" ? "Completed ✓" : saved;
       answerPanel.innerHTML = `
-        <p class="answer-title">Saved Answer</p>
-        <p class="answer-text">${escapeHtml(getAnswer(card.id))}</p>
+        <p class="answer-title">${completed ? "Completed Action" : "Saved Answer"}</p>
+        <p class="answer-text">${escapeHtml(displayAnswer)}</p>
         <div class="controls">
-          <button class="action danger" id="deleteAnswerBtn">Delete Answer</button>
+          <button class="action danger" id="deleteAnswerBtn">${completed ? "Undo Completion" : "Delete Answer"}</button>
         </div>
       `;
 
@@ -1839,9 +2157,16 @@
     }
 
     function openAnswerModal(card) {
+      const isAction = isActionCard(card);
       modalCardId = card.id;
-      answerModalQuestion.textContent = `Card #${card.id}: ${card.question}`;
-      answerInput.value = getAnswer(card.id);
+      answerModalTitle.textContent = isAction ? "Complete This Action" : "Answer This Card";
+      answerModalQuestion.textContent = `Card #${card.id}: ${getCardText(card)}`;
+      answerInput.placeholder = isAction
+        ? "Add a note about how it went (optional)..."
+        : "Type your note here...";
+      const saved = getAnswer(card.id);
+      answerInput.value = isAction && saved === "Done" ? "" : saved;
+      answerSaveBtn.textContent = isAction ? "Mark Complete" : "Save Answer";
       answerModal.hidden = false;
       answerInput.focus();
     }
@@ -1850,26 +2175,31 @@
       answerModal.hidden = true;
       modalCardId = null;
       answerInput.value = "";
+      answerInput.placeholder = "Type your note here...";
       answerModalQuestion.textContent = "";
+      answerModalTitle.textContent = "Answer This Card";
+      answerSaveBtn.textContent = "Save Answer";
     }
 
     async function saveModalAnswer() {
       if (modalCardId === null || !firebaseReady) return;
 
       const trimmedAnswer = answerInput.value.trim();
-      if (!trimmedAnswer) {
+      const card = cards.find(entry => entry.id === modalCardId);
+      if (!card) return;
+
+      const isAction = isActionCard(card);
+      if (!isAction && !trimmedAnswer) {
         window.alert("Please enter a note to save this answer.");
         return;
       }
 
-      const card = cards.find(entry => entry.id === modalCardId);
-      if (!card) return;
-
       answerSaveBtn.disabled = true;
       try {
         await roomRef().child(`answers/${modalCardId}`).set({
-          answer: trimmedAnswer,
-          question: card.question,
+          answer: trimmedAnswer || "Done",
+          question: getCardText(card),
+          type: card.type || "question",
           answeredAt: firebase.database.ServerValue.TIMESTAMP
         });
         await roomRef().child(`skipped/${modalCardId}`).remove();
@@ -1882,7 +2212,7 @@
         renderCard();
       } catch (error) {
         console.error(error);
-        window.alert("Could not save your answer. Please try again.");
+        window.alert(isAction ? "Could not mark this action complete. Please try again." : "Could not save your answer. Please try again.");
       } finally {
         answerSaveBtn.disabled = false;
       }
@@ -1928,16 +2258,17 @@
       const inSkipped = activeCategory === SKIPPED_CATEGORY;
       answerBtn.style.display = inAnswered ? "none" : "inline-block";
       skipBtn.style.display = inAnswered || inSkipped ? "none" : "inline-block";
+      cardSurface.classList.remove("action-card");
 
       if (!card) {
         categoryLabel.textContent = inAnswered
-          ? "Answered Cards"
+          ? "Answered & Completed"
           : inSkipped
             ? "Skipped Cards"
             : "No Cards Left";
-        cardId.textContent = "";
+        cardMeta.textContent = "";
         questionText.textContent = inAnswered
-          ? "No answered cards yet."
+          ? "No answered cards or completed actions yet."
           : inSkipped
             ? "No skipped cards yet."
             : "Every card in this category has been answered or skipped.";
@@ -1949,11 +2280,15 @@
         return;
       }
 
+      const isAction = isActionCard(card);
+      cardSurface.classList.toggle("action-card", isAction);
       categoryLabel.textContent = card.category;
-      cardId.textContent = `Card #${card.id}`;
-      questionText.textContent = card.question;
+      cardMeta.textContent = `Card #${card.id} · ${isAction ? "Action" : "Question"}`;
+      questionText.textContent = getCardText(card);
       depthLabel.textContent = `Depth ${card.depth}`;
       hearts.textContent = "♥".repeat(card.depth);
+      answerBtn.textContent = isAction ? "We Did It" : "Answer Card";
+      skipBtn.textContent = isAction ? "Skip Action" : "Skip Question";
       counter.textContent = `${currentIndex + 1} of ${currentDeck.length} in ${activeCategory}`;
       totalPill.textContent = `${currentDeck.length} cards`;
       renderAnswerPanel(card);
