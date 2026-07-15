@@ -3,16 +3,16 @@
   var config = window.CONNECTION_CARDS_ADS || {};
   if (config.enabled === false) return;
 
-  var script = document.createElement("script");
-  script.async = true;
-  script.crossOrigin = "anonymous";
-  script.src =
-    "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" +
-    PUBLISHER_ID;
-  document.head.appendChild(script);
+  function mountAds() {
+    if (!window.adsbygoogle) {
+      setTimeout(mountAds, 100);
+      return;
+    }
 
-  script.onload = function () {
     document.querySelectorAll(".ad-slot[data-ad-unit]").forEach(function (container) {
+      if (container.dataset.adMounted === "true") return;
+      container.dataset.adMounted = "true";
+
       var unitKey = container.dataset.adUnit;
       var slotId = (config.slots && config.slots[unitKey]) || "";
 
@@ -33,5 +33,11 @@
         console.warn("AdSense:", error);
       }
     });
-  };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountAds);
+  } else {
+    mountAds();
+  }
 })();
