@@ -358,11 +358,12 @@
 
     .ad-slot {
       min-height: 0;
-      margin-top: 4px;
+      margin-top: 12px;
       padding: 8px 0;
       border-radius: 16px;
       overflow: hidden;
       text-align: center;
+      width: 100%;
     }
 
     .ad-slot[hidden] {
@@ -413,14 +414,13 @@
           <button class="action" id="skipBtn">Skip Question</button>
           <button class="action" id="answerBtn">Answer Card</button>
         </div>
+        <div class="ad-slot" id="adFooter" data-ad-unit="footer" hidden aria-label="Advertisement"></div>
       </section>
     </div>
 
     <section class="answer-panel" id="answerPanel" hidden></section>
 
     <div class="counter" id="counter"></div>
-
-    <div class="ad-slot" id="adFooter" data-ad-unit="footer" hidden aria-label="Advertisement"></div>
   </main>
 
   <div class="modal-overlay" id="answerModal" hidden>
