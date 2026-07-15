@@ -334,7 +334,7 @@
     }
 
     .card.action-card .question::before {
-      content: "Do this now";
+      content: "Do this together";
       display: block;
       font-size: 0.72rem;
       font-weight: 800;
@@ -355,7 +355,22 @@
     .sync-status.error {
       color: #c62828;
     }
+
+    .ad-slot {
+      min-height: 0;
+      margin-top: 4px;
+      padding: 8px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .ad-slot[hidden] {
+      display: none;
+    }
   </style>
+  <script src="/js/ads-config.js"></script>
+  <script src="/js/adsense.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
@@ -404,6 +419,8 @@
     <section class="answer-panel" id="answerPanel" hidden></section>
 
     <div class="counter" id="counter"></div>
+
+    <div class="ad-slot" id="adFooter" data-ad-unit="footer" hidden aria-label="Advertisement"></div>
   </main>
 
   <div class="modal-overlay" id="answerModal" hidden>
@@ -435,7 +452,7 @@
             "id": 2,
             "category": "How You See Me",
             "depth": 3,
-            "question": "What's one thing I do that you secretly find really attractive but have never told me?"
+            "question": "What's one thing I do that you secretly find really endearing but have never told me?"
       },
       {
             "id": 3,
@@ -1146,126 +1163,6 @@
             "question": "If you had to thank me for one thing, what would it be?"
       },
       {
-            "id": 121,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's something I do that instantly gives you butterflies?"
-      },
-      {
-            "id": 122,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's your favorite way for me to kiss you?"
-      },
-      {
-            "id": 123,
-            "category": "Intimate & Flirty",
-            "depth": 1,
-            "question": "What's something I wear that you secretly love?"
-      },
-      {
-            "id": 124,
-            "category": "Intimate & Flirty",
-            "depth": 3,
-            "question": "When have you found me the most irresistible?"
-      },
-      {
-            "id": 125,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's something completely innocent that I do that's unexpectedly attractive?"
-      },
-      {
-            "id": 126,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's your favorite memory of us cuddling?"
-      },
-      {
-            "id": 127,
-            "category": "Intimate & Flirty",
-            "depth": 1,
-            "question": "Where's your favorite place for me to hold your hand?"
-      },
-      {
-            "id": 128,
-            "category": "Intimate & Flirty",
-            "depth": 3,
-            "question": "What's one thing you wish we did more often when we're alone?"
-      },
-      {
-            "id": 129,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's something I do that always makes you blush?"
-      },
-      {
-            "id": 130,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's one compliment from me you'll never get tired of hearing?"
-      },
-      {
-            "id": 131,
-            "category": "Intimate & Flirty",
-            "depth": 3,
-            "question": "What's something you've wanted to tell me in the moment but held back?"
-      },
-      {
-            "id": 132,
-            "category": "Intimate & Flirty",
-            "depth": 4,
-            "question": "What part of our chemistry feels the strongest?"
-      },
-      {
-            "id": 133,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's your favorite kind of date night with me?"
-      },
-      {
-            "id": 134,
-            "category": "Intimate & Flirty",
-            "depth": 3,
-            "question": "If we had an uninterrupted weekend together, how would you want to spend it?"
-      },
-      {
-            "id": 135,
-            "category": "Intimate & Flirty",
-            "depth": 2,
-            "question": "What's one little touch from me that always gets your attention?"
-      },
-      {
-            "id": 136,
-            "category": "Intimate & Flirty",
-            "depth": 4,
-            "question": "What's one thing you think is incredibly attractive about my personality?"
-      },
-      {
-            "id": 137,
-            "category": "Intimate & Flirty",
-            "depth": 3,
-            "question": "What's one moment when you couldn't stop smiling because of me?"
-      },
-      {
-            "id": 138,
-            "category": "Intimate & Flirty",
-            "depth": 4,
-            "question": "What's one thing you hope I never stop doing when we're together?"
-      },
-      {
-            "id": 139,
-            "category": "Intimate & Flirty",
-            "depth": 5,
-            "question": "If you could pause time during one romantic moment we've shared, which moment would you choose?"
-      },
-      {
-            "id": 140,
-            "category": "Intimate & Flirty",
-            "depth": 5,
-            "question": "What's one romantic moment you hope we create together someday?"
-      },
-      {
             "id": 141,
             "category": "Vulnerable & Honest",
             "depth": 3,
@@ -1507,417 +1404,143 @@
       },
       {
             "id": 181,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "What's something slightly taboo you've fantasized about doing with me but haven't brought up yet?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 1,
+            "action": "Hold hands and sit in silence together for two full minutes."
       },
       {
             "id": 182,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "Is there a place outside the bedroom where the risk of getting caught actually excites you?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Give each other a slow, genuine hug for at least 60 seconds."
       },
       {
             "id": 183,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "What's one thing you've seen or read that made you think, 'I want to try that with you'?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Trade five specific compliments—no repeats, no generic ones."
       },
       {
             "id": 184,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "Would you rather take full control for a night or surrender it completely—and what would that look like?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Slow dance together for one full song, even if there's no music playing."
       },
       {
             "id": 185,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "What's a nickname or thing to say in the moment that feels a little forbidden but turns you on?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Plan your next date out loud together in the next five minutes—time, place, and vibe."
       },
       {
             "id": 186,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "Is there an outfit, costume, or role-play scenario you'd love me to try for you?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Write down three things you appreciate about each other and read them aloud."
       },
       {
             "id": 187,
-            "category": "Taboo Desires",
-            "depth": 3,
-            "question": "What's something innocent we already do that you'd secretly want to turn into foreplay?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Take a photo together that you'd actually want to keep."
       },
       {
             "id": 188,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "How do you feel about blindfolds, light restraints, or being teased before you're allowed to touch?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Stare into each other's eyes without talking for 30 seconds."
       },
       {
             "id": 189,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "What's one boundary we've never talked about that you'd actually be curious to explore together?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Share your favorite memory together from the past year."
       },
       {
             "id": 190,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "Is there a time or situation—early morning, on vacation, after tension—when wanting me feels especially forbidden?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Cook a meal together or order in your favorite comfort food tonight."
       },
       {
             "id": 191,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "What's a fantasy about us that involves quietly breaking one of our own unspoken rules?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Commit to sending each other a sweet message tomorrow morning."
       },
       {
             "id": 192,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "Would you ever want to record or photograph us together, or does that feel like a line you wouldn't cross?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Go for a 15-minute walk together—phones in pockets."
       },
       {
             "id": 193,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "What's something you want me to whisper to you that you'd never say out loud in daylight?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 1,
+            "action": "Play rock-paper-scissors—loser does one small favor the winner gets to pick."
       },
       {
             "id": 194,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "Is there a toy or prop you've been curious about bringing into our routine?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Recreate the conversation from your first date—or tell the story if you weren't there."
       },
       {
             "id": 195,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "What's something you've done before that you'd love to recreate with me—but make it even better?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Each pick a song that reminds you of the other and listen to both back to back."
       },
       {
             "id": 196,
-            "category": "Taboo Desires",
-            "depth": 3,
-            "question": "How would you feel about me initiating in a completely unexpected moment—mid-movie, while cooking, etc.?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 1,
+            "action": "Draw a silly portrait of each other and reveal them at the same time."
       },
       {
             "id": 197,
-            "category": "Taboo Desires",
-            "depth": 4,
-            "question": "What's a sensation—ice, warm oil, a slow massage—you've secretly wanted to explore on each other?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 3,
+            "action": "Set one relationship goal for the next month and write it down together."
       },
       {
             "id": 198,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "Is there a power dynamic—strangers, boss and employee, forbidden crush—that secretly does it for you with me?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Thank each other for something specific that happened this week."
       },
       {
             "id": 199,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "What's something we'd do on a 'no judgment' night that we'd never tell anyone about?"
+            "category": "Connection Actions",
+            "type": "action",
+            "depth": 2,
+            "action": "Put phones away for one hour and be fully present with each other."
       },
       {
             "id": 200,
-            "category": "Taboo Desires",
-            "depth": 5,
-            "question": "If you had one free pass to request something a little naughty with zero awkwardness, what would it be?"
-      },
-      {
-            "id": 201,
-            "category": "Dom & Sub",
+            "category": "Connection Actions",
             "type": "action",
-            "depth": 4,
-            "action": "Flip a coin—winner is dom for the next 15 minutes. The sub follows instructions without negotiating."
-      },
-      {
-            "id": 202,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Sub must ask permission before touching or kissing for the next 10 minutes. Dom says yes or no."
-      },
-      {
-            "id": 203,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Dom gives three explicit commands. Sub completes each one before hearing the next."
-      },
-      {
-            "id": 204,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 4,
-            "action": "Trade roles—one round as dom, one round as sub. Check in after each round."
-      },
-      {
-            "id": 205,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Sub kneels and holds eye contact while dom describes exactly what they want done to them."
-      },
-      {
-            "id": 206,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Dom picks one piece of clothing the sub must remove—slowly, only when commanded."
-      },
-      {
-            "id": 207,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Use a scarf, tie, or belt as soft wrist restraints. Sub can say stop anytime—dom checks in once."
-      },
-      {
-            "id": 208,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Sub plays the brat—push, tease, and talk back until dom takes control. Agree on a safe word first."
-      },
-      {
-            "id": 209,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Dom leads for five minutes with only touch—no words. Sub follows every move."
-      },
-      {
-            "id": 210,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "With enthusiastic consent, leave a light handprint on thigh or ass—then soothe the spot with slow kisses."
-      },
-      {
-            "id": 211,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 5,
-            "action": "Pick a safe word together right now, then push one small boundary you've both been curious about."
-      },
-      {
-            "id": 212,
-            "category": "Dom & Sub",
-            "type": "action",
-            "depth": 4,
-            "action": "One partner cannot speak for five minutes—communicate only through touch, gestures, and eye contact."
-      },
-      {
-            "id": 213,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "Try cowgirl or reverse cowgirl for two minutes—the person underneath keeps their hands to themselves."
-      },
-      {
-            "id": 214,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "Missionary with the top partner gently pinning both wrists above their head for one full minute."
-      },
-      {
-            "id": 215,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "Try 69 for two minutes—or hover close and tease without full contact if you want to build up."
-      },
-      {
-            "id": 216,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "Doggy style for two minutes—top partner holds hips or hair (only if that's a yes for both of you)."
-      },
-      {
-            "id": 217,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "Anvil position: bottom partner puts legs on top partner's shoulders. Hold for one minute."
-      },
-      {
-            "id": 218,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 4,
-            "action": "Standing sex against a wall or door—make out heavily for three minutes without moving to the bed."
-      },
-      {
-            "id": 219,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 4,
-            "action": "Spoon together and grind slowly for five minutes—clothes on or off, your choice."
-      },
-      {
-            "id": 220,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 4,
-            "action": "Chair sex—one partner sits, the other takes control on top or from behind."
-      },
-      {
-            "id": 221,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 4,
-            "action": "Kitchen counter: place your partner on the edge and go missionary—or start there and see where it leads."
-      },
-      {
-            "id": 222,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "Shower sex for three minutes—watch your footing, keep it fun and consensual."
-      },
-      {
-            "id": 223,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 4,
-            "action": "Fully clothed quickie—figure out how to get there without undressing and enjoy the urgency."
-      },
-      {
-            "id": 224,
-            "category": "Sex Positions",
-            "type": "action",
-            "depth": 5,
-            "action": "End the night in a position you haven't tried recently—or commit to one new position before sleep."
-      },
-      {
-            "id": 225,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Five minutes of dirty talk only—describe in detail what you want to do. No touching yet."
-      },
-      {
-            "id": 226,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 5,
-            "action": "Edge your partner—bring them close, then pause. Repeat twice before they're allowed to finish."
-      },
-      {
-            "id": 227,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Blindfold your partner and use only your mouth somewhere below the neck for three minutes."
-      },
-      {
-            "id": 228,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Mutual masturbation—watch each other or guide each other's hands for five minutes."
-      },
-      {
-            "id": 229,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Full-body massage with oil—take turns, build slowly, and don't rush the happy ending."
-      },
-      {
-            "id": 230,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Role-play as strangers meeting for the first time—flirt hard, then escalate within 10 minutes."
-      },
-      {
-            "id": 231,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 3,
-            "action": "Put on a song and do a slow striptease—one item of clothing at a time."
-      },
-      {
-            "id": 232,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Ice cube or warm breath play—alternate sensations on neck, chest, or inner thigh for two minutes."
-      },
-      {
-            "id": 233,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Read a steamy passage to each other out loud—see how far you get before you stop reading."
-      },
-      {
-            "id": 234,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 3,
-            "action": "Send your partner a flirty or explicit text right now—build anticipation for later tonight."
-      },
-      {
-            "id": 235,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Try a new sex toy or vibrator together—even a finger or shower head counts if you're improvising."
-      },
-      {
-            "id": 236,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Make out in the car—parked, windows up, and see how long you can keep your hands to yourselves."
-      },
-      {
-            "id": 237,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 5,
-            "action": "Risky location challenge: pick somewhere in your home you haven't had sex yet and go there now."
-      },
-      {
-            "id": 238,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Naked cuddling for ten minutes—no rushing to more unless you both want to."
-      },
-      {
-            "id": 239,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 5,
-            "action": "Take tasteful nudes of each other—only if you're both comfortable, and keep them somewhere private."
-      },
-      {
-            "id": 240,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 4,
-            "action": "Oral focus round—one partner receives undivided attention for five minutes, then switch."
-      },
-      {
-            "id": 241,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 5,
-            "action": "Stay in bed together for the next hour—phones off, everything else can wait."
-      },
-      {
-            "id": 242,
-            "category": "Intimacy Actions",
-            "type": "action",
-            "depth": 5,
-            "action": "Share one fantasy out loud, then act on the tamest part of it together in the next ten minutes."
+            "depth": 2,
+            "action": "Create a simple goodnight ritual you'll try to repeat this week."
       }
 ];
 
@@ -2121,70 +1744,18 @@
         glow: "rgba(244,162,97,.24)",
         shadow: "0 24px 70px rgba(132, 88, 46, .22)"
       },
-      "Intimate & Flirty": {
-        bg1: "#ffe8f4",
-        bg2: "#f0e8ff",
-        spot1: "rgba(255,255,255,.9)",
-        spot2: "rgba(255,155,206,.58)",
-        ink: "#351a30",
-        muted: "#7c5b78",
-        card: "rgba(255,255,255,.84)",
-        accent: "#ff4d8d",
-        accent2: "#8f5bff",
-        glow: "rgba(255,77,141,.25)",
-        shadow: "0 24px 70px rgba(112, 46, 108, .24)"
-      },
-      "Taboo Desires": {
-        bg1: "#1c0a12",
-        bg2: "#26101c",
-        spot1: "rgba(255,255,255,.06)",
-        spot2: "rgba(180,60,90,.4)",
-        ink: "#f8e8ee",
-        muted: "#c4a0ad",
-        card: "rgba(45,22,34,.82)",
-        accent: "#e84a6f",
-        accent2: "#9b4dca",
-        glow: "rgba(232,74,111,.28)",
-        shadow: "0 24px 70px rgba(0, 0, 0, .42)"
-      },
-      "Dom & Sub": {
-        bg1: "#120810",
-        bg2: "#1e0c18",
-        spot1: "rgba(255,255,255,.05)",
-        spot2: "rgba(160,40,90,.4)",
-        ink: "#fce8ef",
-        muted: "#b88a96",
-        card: "rgba(38,18,28,.85)",
-        accent: "#ff3d6e",
-        accent2: "#8f2fff",
-        glow: "rgba(255,61,110,.3)",
-        shadow: "0 24px 70px rgba(0, 0, 0, .48)"
-      },
-      "Sex Positions": {
-        bg1: "#1a1028",
-        bg2: "#241438",
-        spot1: "rgba(255,255,255,.06)",
-        spot2: "rgba(120,80,220,.35)",
-        ink: "#f0e8ff",
-        muted: "#a898c4",
-        card: "rgba(36,24,52,.85)",
-        accent: "#9b5cff",
-        accent2: "#ff5c9a",
-        glow: "rgba(155,92,255,.28)",
-        shadow: "0 24px 70px rgba(20, 10, 40, .45)"
-      },
-      "Intimacy Actions": {
-        bg1: "#2a1018",
-        bg2: "#3a1828",
-        spot1: "rgba(255,255,255,.07)",
-        spot2: "rgba(255,100,80,.35)",
-        ink: "#fff0f4",
-        muted: "#c49aa8",
-        card: "rgba(48,22,32,.84)",
-        accent: "#ff6b4a",
-        accent2: "#ff3d7a",
-        glow: "rgba(255,107,74,.28)",
-        shadow: "0 24px 70px rgba(40, 12, 24, .42)"
+      "Connection Actions": {
+        bg1: "#fff0e8",
+        bg2: "#ffe8f0",
+        spot1: "rgba(255,255,255,.92)",
+        spot2: "rgba(255,180,160,.45)",
+        ink: "#3a1f24",
+        muted: "#8a5f68",
+        card: "rgba(255,255,255,.86)",
+        accent: "#e85d7a",
+        accent2: "#ff8c42",
+        glow: "rgba(232,93,122,.22)",
+        shadow: "0 24px 70px rgba(120, 48, 56, .2)"
       },
       "Vulnerable & Honest": {
         bg1: "#eaf6ff",
