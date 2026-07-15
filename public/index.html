@@ -324,7 +324,70 @@
       flex-wrap: wrap;
     }
 
-    .room-bar .action {
+    .room-panel {
+      display: grid;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.5);
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 20px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
+    }
+
+    .room-panel-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .room-current {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .room-current strong {
+      color: var(--ink);
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+    }
+
+    .room-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .room-input {
+      flex: 1 1 160px;
+      min-width: 140px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.85);
+      background: rgba(255,255,255,.82);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .room-input::placeholder {
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: 600;
+    }
+
+    .room-bar .action,
+    .room-panel .action {
       padding: 10px 14px;
       font-size: 0.85rem;
     }
@@ -388,11 +451,32 @@
       </div>
       <div class="room-bar">
         <div class="pill" id="totalPill">140 cards</div>
-        <div class="pill">Room: <strong id="roomCode">…</strong></div>
-        <button class="action" type="button" id="copyRoomBtn">Copy link</button>
         <span class="sync-status" id="syncStatus">Connecting…</span>
       </div>
     </header>
+
+    <section class="room-panel" aria-label="Room controls">
+      <div class="room-panel-top">
+        <div class="room-current">
+          <span>Room</span>
+          <strong id="roomCode">…</strong>
+        </div>
+        <button class="action" type="button" id="copyRoomBtn">Copy Link</button>
+      </div>
+      <div class="room-controls">
+        <input
+          id="roomJoinInput"
+          class="room-input"
+          type="text"
+          placeholder="Enter room code to join"
+          maxlength="12"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="action primary" type="button" id="joinRoomBtn">Join Room</button>
+        <button class="action" type="button" id="newRoomBtn">New Room</button>
+      </div>
+    </section>
 
     <div class="content">
       <nav class="menu" id="categoryMenu"></nav>
@@ -1554,6 +1638,7 @@
     let currentDeck = [];
     let currentIndex = 0;
     let roomId = null;
+    let roomDbRef = null;
     let firebaseReady = false;
     let answersById = {};
     let skippedIds = [];
@@ -1570,6 +1655,9 @@
     const counter = document.getElementById("counter");
     const totalPill = document.getElementById("totalPill");
     const roomCodeEl = document.getElementById("roomCode");
+    const roomJoinInput = document.getElementById("roomJoinInput");
+    const joinRoomBtn = document.getElementById("joinRoomBtn");
+    const newRoomBtn = document.getElementById("newRoomBtn");
     const syncStatus = document.getElementById("syncStatus");
     const copyRoomBtn = document.getElementById("copyRoomBtn");
     const skipBtn = document.getElementById("skipBtn");
@@ -1586,6 +1674,10 @@
       return window.connectionCardsFirebase.db.ref(`rooms/${roomId}`);
     }
 
+    function normalizeRoomCode(value) {
+      return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    }
+
     function generateRoomCode() {
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       let code = "";
@@ -1598,7 +1690,7 @@
     function getOrCreateRoomId() {
       const fromUrl = new URLSearchParams(location.search).get("room");
       if (fromUrl) {
-        const code = fromUrl.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+        const code = normalizeRoomCode(fromUrl);
         if (code) {
           localStorage.setItem(ROOM_KEY, code);
           return code;
@@ -1610,7 +1702,76 @@
         stored = generateRoomCode();
         localStorage.setItem(ROOM_KEY, stored);
       }
-      return stored;
+      return normalizeRoomCode(stored) || generateRoomCode();
+    }
+
+    function handleRoomSnapshot(snapshot) {
+      const data = snapshot.val() || {};
+      answersById = {};
+      for (const [id, entry] of Object.entries(data.answers || {})) {
+        answersById[id] = entry.answer || "";
+      }
+      skippedIds = Object.keys(data.skipped || {}).map(Number);
+      firebaseReady = true;
+      syncStatus.textContent = "Synced";
+      syncStatus.classList.remove("error");
+      currentDeck = getDeckForCategory(activeCategory);
+      renderMenu();
+      renderCard();
+    }
+
+    function handleRoomError(error) {
+      syncStatus.textContent = "Sync error";
+      syncStatus.classList.add("error");
+      console.error(error);
+    }
+
+    function detachRoomListener() {
+      if (roomDbRef) {
+        roomDbRef.off();
+        roomDbRef = null;
+      }
+    }
+
+    function updateRoomDisplay(code) {
+      roomId = code;
+      roomCodeEl.textContent = code;
+      roomJoinInput.value = code;
+      localStorage.setItem(ROOM_KEY, code);
+    }
+
+    function connectToRoom(db, code) {
+      detachRoomListener();
+      firebaseReady = false;
+      answersById = {};
+      skippedIds = [];
+      syncStatus.textContent = "Connecting…";
+      syncStatus.classList.remove("error");
+      updateRoomDisplay(code);
+      roomDbRef = db.ref(`rooms/${code}`);
+      roomDbRef.on("value", handleRoomSnapshot, handleRoomError);
+      renderMenu();
+      renderCard();
+    }
+
+    function switchToRoom(code) {
+      const normalized = normalizeRoomCode(code);
+      if (!normalized) {
+        window.alert("Enter a valid room code (letters and numbers).");
+        return;
+      }
+      if (normalized === roomId) {
+        syncStatus.textContent = "Already in this room";
+        setTimeout(() => {
+          if (firebaseReady) syncStatus.textContent = "Synced";
+        }, 1500);
+        return;
+      }
+      connectToRoom(window.connectionCardsFirebase.db, normalized);
+    }
+
+    function startNewRoom() {
+      connectToRoom(window.connectionCardsFirebase.db, generateRoomCode());
     }
 
     async function initFirebase() {
@@ -1618,35 +1779,12 @@
         const { auth, db } = window.connectionCardsFirebase;
         syncStatus.textContent = "Connecting…";
         await auth.signInAnonymously();
-        roomId = getOrCreateRoomId();
-        roomCodeEl.textContent = roomId;
 
         if (new URLSearchParams(location.search).get("room")) {
           history.replaceState(null, "", location.pathname);
         }
 
-        db.ref(`rooms/${roomId}`).on(
-          "value",
-          snapshot => {
-            const data = snapshot.val() || {};
-            answersById = {};
-            for (const [id, entry] of Object.entries(data.answers || {})) {
-              answersById[id] = entry.answer || "";
-            }
-            skippedIds = Object.keys(data.skipped || {}).map(Number);
-            firebaseReady = true;
-            syncStatus.textContent = "Synced";
-            syncStatus.classList.remove("error");
-            currentDeck = getDeckForCategory(activeCategory);
-            renderMenu();
-            renderCard();
-          },
-          error => {
-            syncStatus.textContent = "Sync error";
-            syncStatus.classList.add("error");
-            console.error(error);
-          }
-        );
+        connectToRoom(db, getOrCreateRoomId());
       } catch (error) {
         syncStatus.textContent = "Could not connect";
         syncStatus.classList.add("error");
@@ -2127,6 +2265,24 @@
         }, 2000);
       } catch (_error) {
         window.prompt("Copy this link to share your room:", url);
+      }
+    });
+
+    joinRoomBtn.addEventListener("click", () => {
+      if (!window.connectionCardsFirebase?.db) return;
+      switchToRoom(roomJoinInput.value);
+    });
+
+    newRoomBtn.addEventListener("click", () => {
+      if (!window.connectionCardsFirebase?.db) return;
+      startNewRoom();
+    });
+
+    roomJoinInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (!window.connectionCardsFirebase?.db) return;
+        switchToRoom(roomJoinInput.value);
       }
     });
 
