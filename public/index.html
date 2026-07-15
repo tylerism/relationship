@@ -46,8 +46,74 @@
       display: flex;
       justify-content: space-between;
       gap: 16px;
-      align-items: center;
+      align-items: flex-start;
       flex-wrap: wrap;
+    }
+
+    .header-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .app-menu {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .hamburger-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.7);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
+    }
+
+    .hamburger-btn[aria-expanded="true"] {
+      color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(196, 79, 146, .18);
+    }
+
+    .hamburger-icon {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .hamburger-icon::before,
+    .hamburger-icon::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+    }
+
+    .hamburger-icon::before {
+      top: -6px;
+    }
+
+    .hamburger-icon::after {
+      top: 6px;
+    }
+
+    .app-menu-panel {
+      left: 0;
+      right: auto;
+    }
+
+    .header-copy {
+      min-width: 0;
     }
 
     .content {
@@ -615,28 +681,6 @@
       line-height: 1;
     }
 
-    .mode-pill {
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .account-chip {
-      cursor: pointer;
-      color: var(--ink);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .account-chip:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 32px rgba(83, 38, 86, .12);
-    }
-
-    .account-chip[aria-expanded="true"] {
-      color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(196, 79, 146, .18);
-    }
-
     .menu-danger {
       color: #b42318;
       background: rgba(180, 35, 24, .08);
@@ -653,35 +697,43 @@
 <body>
   <main class="app">
     <header>
-      <div>
-        <h1>Connection Cards</h1>
-        <p class="subtitle">Pick a category, draw a card, answer questions or complete actions together.</p>
-      </div>
-      <div class="header-controls">
-        <div class="pill mode-pill guest-only" id="modePillFree">Free</div>
-        <div class="account-only account-chip-dropdown dropdown" hidden>
+      <div class="header-main">
+        <div class="app-menu dropdown">
           <button
-            class="pill mode-pill account-chip"
+            class="hamburger-btn"
             type="button"
-            id="accountChipBtn"
+            id="appMenuBtn"
+            aria-label="Open menu"
             aria-expanded="false"
             aria-haspopup="true"
-            aria-controls="accountMenu"
+            aria-controls="appMenuPanel"
           >
-            <span id="accountChipLabel">Account</span>
+            <span class="hamburger-icon" aria-hidden="true"></span>
           </button>
-          <div class="menu-panel account-menu" id="accountMenu" hidden>
-            <p class="room-menu-label">Your account</p>
-            <p class="menu-hint" id="accountMenuEmail"></p>
-            <p class="menu-hint">Manage sign-in, reset your password, or delete your account.</p>
-            <button class="action" type="button" id="resetPasswordBtn">Send Password Reset Email</button>
-            <button class="action" type="button" id="signOutBtn">Sign Out</button>
-            <button class="action menu-danger" type="button" id="deleteAccountBtn">Delete Account</button>
-            <span class="menu-hint" id="accountActionStatus"></span>
+          <div class="menu-panel app-menu-panel" id="appMenuPanel" hidden>
+            <p class="room-menu-label">Status</p>
+            <p class="menu-hint" id="appMenuMode">Free mode</p>
+            <p class="menu-hint" id="appMenuCardCount">0 cards</p>
+            <div class="guest-only" id="appMenuGuestSection">
+              <button class="action primary" type="button" id="signInBtn" style="width:100%;">Sign In</button>
+            </div>
+            <div class="account-only" id="appMenuAccountSection" hidden>
+              <p class="room-menu-label">Your account</p>
+              <p class="menu-hint" id="accountMenuEmail"></p>
+              <p class="menu-hint">Manage sign-in, reset your password, or delete your account.</p>
+              <button class="action" type="button" id="resetPasswordBtn">Send Password Reset Email</button>
+              <button class="action" type="button" id="signOutBtn">Sign Out</button>
+              <button class="action menu-danger" type="button" id="deleteAccountBtn">Delete Account</button>
+              <span class="menu-hint" id="accountActionStatus"></span>
+            </div>
           </div>
         </div>
-        <div class="pill" id="totalPill">140 cards</div>
-
+        <div class="header-copy">
+          <h1>Connection Cards</h1>
+          <p class="subtitle">Pick a category, draw a card, answer questions or complete actions together.</p>
+        </div>
+      </div>
+      <div class="header-controls">
         <div class="guest-only room-dropdown dropdown">
           <button
             class="action room-menu-btn"
@@ -782,8 +834,6 @@
             <ul class="members-list" id="membersList" hidden></ul>
           </div>
         </div>
-
-        <button class="action guest-only" type="button" id="signInBtn">Sign In</button>
 
         <span class="sync-status" id="syncStatus">Connecting…</span>
       </div>
@@ -2002,7 +2052,9 @@
     const depthLabel = document.getElementById("depthLabel");
     const hearts = document.getElementById("hearts");
     const counter = document.getElementById("counter");
-    const totalPill = document.getElementById("totalPill");
+    const appMenuCardCount = document.getElementById("appMenuCardCount");
+    const appMenuBtn = document.getElementById("appMenuBtn");
+    const appMenuPanel = document.getElementById("appMenuPanel");
     const roomCodeEl = document.getElementById("roomCode");
     const roomMenuBtn = document.getElementById("roomMenuBtn");
     const roomMenu = document.getElementById("roomMenu");
@@ -2030,6 +2082,22 @@
       syncStatus.textContent = text;
       syncStatus.classList.toggle("error", !!isError);
     }
+
+    function setAppMenuOpen(open) {
+      if (!appMenuPanel || !appMenuBtn) return;
+      appMenuPanel.hidden = !open;
+      appMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    function toggleAppMenu() {
+      if (appMenuPanel.hidden) {
+        setRoomMenuOpen(false);
+        window.ConnectionCardsAccount?.closeMenus?.();
+      }
+      setAppMenuOpen(appMenuPanel.hidden);
+    }
+
+    window.setAppMenuOpen = setAppMenuOpen;
 
     function setRoomMenuOpen(open) {
       roomMenu.hidden = !open;
@@ -2548,7 +2616,7 @@
         depthLabel.textContent = "";
         hearts.textContent = "";
         counter.textContent = `0 cards in ${activeCategory}`;
-        totalPill.textContent = "0 cards";
+        if (appMenuCardCount) appMenuCardCount.textContent = "0 cards in " + activeCategory;
         renderAnswerPanel(null);
         return;
       }
@@ -2563,7 +2631,7 @@
       answerBtn.textContent = isAction ? "We Did It" : "Answer Card";
       skipBtn.textContent = isAction ? "Skip Action" : "Skip Question";
       counter.textContent = `${currentIndex + 1} of ${currentDeck.length} in ${activeCategory}`;
-      totalPill.textContent = `${currentDeck.length} cards`;
+      if (appMenuCardCount) appMenuCardCount.textContent = `${currentDeck.length} cards in ${activeCategory}`;
       renderAnswerPanel(card);
     }
 
@@ -2629,6 +2697,10 @@
           closeAnswerModal();
           return;
         }
+        if (!appMenuPanel.hidden) {
+          setAppMenuOpen(false);
+          return;
+        }
         if (!roomMenu.hidden) {
           setRoomMenuOpen(false);
           return;
@@ -2644,12 +2716,24 @@
       if (event.key.toLowerCase() === "s") shuffleDeck();
     });
 
+    appMenuBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      toggleAppMenu();
+    });
+
+    appMenuPanel.addEventListener("click", event => {
+      event.stopPropagation();
+    });
+
     roomMenuBtn.addEventListener("click", event => {
       event.stopPropagation();
       toggleRoomMenu();
     });
 
     document.addEventListener("click", event => {
+      if (!appMenuPanel.hidden && !event.target.closest(".app-menu")) {
+        setAppMenuOpen(false);
+      }
       if (!roomMenu.hidden && !event.target.closest(".room-dropdown")) {
         setRoomMenuOpen(false);
       }

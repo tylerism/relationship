@@ -107,9 +107,18 @@
     if (open) {
       setAuthTab("signin");
       $("authSignInEmail")?.focus();
+      window.setAppMenuOpen?.(false);
     } else {
       showAuthError("");
     }
+  }
+
+  function closeAppMenu() {
+    window.setAppMenuOpen?.(false);
+  }
+
+  function closeMenus() {
+    setRelationshipMenuOpen(false);
   }
 
   function setRelationshipMenuOpen(open) {
@@ -118,15 +127,10 @@
     if (!menu || !btn) return;
     menu.hidden = !open;
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) $("relationshipNameInput")?.focus();
-  }
-
-  function setAccountMenuOpen(open) {
-    const menu = $("accountMenu");
-    const btn = $("accountChipBtn");
-    if (!menu || !btn) return;
-    menu.hidden = !open;
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      $("relationshipNameInput")?.focus();
+      closeAppMenu();
+    }
   }
 
   function setAccountActionStatus(message) {
@@ -151,8 +155,9 @@
     document.querySelectorAll(".account-only").forEach(el => {
       el.hidden = !isAccount;
     });
+    setText("appMenuMode", isAccount ? "Signed in" : "Free mode");
     if (!isAccount) {
-      setAccountMenuOpen(false);
+      closeAppMenu();
     }
   }
 
@@ -225,7 +230,7 @@
 
   function updateAccountUI() {
     if (!isAccountUser(currentUser)) return;
-    setText("accountChipLabel", shortenEmail(currentUser.email));
+    setText("appMenuMode", shortenEmail(currentUser.email));
     setText("accountMenuEmail", currentUser.email);
     const rel = activeRelationshipId ? relationships[activeRelationshipId] : null;
     setText("relationshipCode", rel?.name || "…");
@@ -536,7 +541,7 @@
 
   async function signOut() {
     const { auth } = window.connectionCardsFirebase;
-    setAccountMenuOpen(false);
+    closeAppMenu();
     await auth.signOut();
   }
 
@@ -573,7 +578,7 @@
       ));
       await db.ref(`invitesByEmail/${key}`).remove();
       await db.ref(`users/${uid}`).remove();
-      setAccountMenuOpen(false);
+      closeAppMenu();
       await auth.currentUser.delete();
     } catch (error) {
       console.error(error);
@@ -646,7 +651,10 @@
   }
 
   function wireUI() {
-    $("signInBtn")?.addEventListener("click", () => setAuthModalOpen(true));
+    $("signInBtn")?.addEventListener("click", () => {
+      closeAppMenu();
+      setAuthModalOpen(true);
+    });
     $("authModalClose")?.addEventListener("click", () => setAuthModalOpen(false));
     $("authModalBackdrop")?.addEventListener("click", () => setAuthModalOpen(false));
 
@@ -667,11 +675,6 @@
     $("relationshipMenuBtn")?.addEventListener("click", event => {
       event.stopPropagation();
       setRelationshipMenuOpen($("relationshipMenu")?.hidden);
-    });
-
-    $("accountChipBtn")?.addEventListener("click", event => {
-      event.stopPropagation();
-      setAccountMenuOpen($("accountMenu")?.hidden);
     });
 
     $("resetPasswordBtn")?.addEventListener("click", event => {
@@ -709,13 +712,9 @@
       if (!$("relationshipMenu")?.hidden && !event.target.closest(".relationship-dropdown")) {
         setRelationshipMenuOpen(false);
       }
-      if (!$("accountMenu")?.hidden && !event.target.closest(".account-chip-dropdown")) {
-        setAccountMenuOpen(false);
-      }
     });
 
     $("relationshipMenu")?.addEventListener("click", e => e.stopPropagation());
-    $("accountMenu")?.addEventListener("click", e => e.stopPropagation());
 
     $("relationshipNameInput")?.addEventListener("keydown", event => {
       if (event.key === "Enter") {
@@ -752,6 +751,9 @@
     },
     getActiveRelationshipId() {
       return activeRelationshipId;
+    },
+    closeMenus() {
+      closeMenus();
     }
   };
 })();
