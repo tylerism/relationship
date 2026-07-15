@@ -17,3 +17,7 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RELATIONSHIPS_D7FCE }}
           channelId: live
           projectId: relationships-d7fce
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RELATIONSHIPS_D7FCE }}
+      - run: npx -y firebase-tools@latest deploy --only database,auth --project relationships-d7fce --non-interactive

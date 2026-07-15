@@ -398,7 +398,7 @@
       grid-column: 1 / -1;
     }
 
-    .room-bar .action,
+    .header-controls .action,
     .room-menu .action {
       padding: 10px 14px;
       font-size: 0.85rem;
@@ -445,6 +445,202 @@
     .ad-slot[hidden] {
       display: none;
     }
+
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .menu-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 30;
+      width: min(320px, calc(100vw - 32px));
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(83, 38, 86, .16);
+    }
+
+    .menu-panel[hidden] {
+      display: none;
+    }
+
+    .menu-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .menu-item {
+      width: 100%;
+      text-align: left;
+    }
+
+    .menu-item.active {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .invite-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .members-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .auth-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .auth-modal[hidden] {
+      display: none;
+    }
+
+    .auth-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(44, 23, 51, .35);
+      backdrop-filter: blur(4px);
+    }
+
+    .auth-modal-card {
+      position: relative;
+      width: min(420px, 100%);
+      padding: 24px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.95);
+      border: 1px solid rgba(255,255,255,.85);
+      box-shadow: 0 24px 60px rgba(83, 38, 86, .2);
+      display: grid;
+      gap: 14px;
+    }
+
+    .auth-modal-card h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: -.04em;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .auth-tab.active {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .auth-field label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(126, 102, 135, .25);
+      background: white;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 600;
+    }
+
+    .auth-error {
+      margin: 0;
+      color: #c62828;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .auth-error[hidden] {
+      display: none;
+    }
+
+    .auth-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.8);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .mode-pill {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .account-chip {
+      cursor: pointer;
+      color: var(--ink);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .account-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(83, 38, 86, .12);
+    }
+
+    .account-chip[aria-expanded="true"] {
+      color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(196, 79, 146, .18);
+    }
+
+    .menu-danger {
+      color: #b42318;
+      background: rgba(180, 35, 24, .08);
+    }
   </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3044538481550122" crossorigin="anonymous"></script>
   <script src="/js/ads-config.js"></script>
@@ -461,9 +657,32 @@
         <h1>Connection Cards</h1>
         <p class="subtitle">Pick a category, draw a card, answer questions or complete actions together.</p>
       </div>
-      <div class="room-bar">
+      <div class="header-controls">
+        <div class="pill mode-pill guest-only" id="modePillFree">Free</div>
+        <div class="account-only account-chip-dropdown dropdown" hidden>
+          <button
+            class="pill mode-pill account-chip"
+            type="button"
+            id="accountChipBtn"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="accountMenu"
+          >
+            <span id="accountChipLabel">Account</span>
+          </button>
+          <div class="menu-panel account-menu" id="accountMenu" hidden>
+            <p class="room-menu-label">Your account</p>
+            <p class="menu-hint" id="accountMenuEmail"></p>
+            <p class="menu-hint">Manage sign-in, reset your password, or delete your account.</p>
+            <button class="action" type="button" id="resetPasswordBtn">Send Password Reset Email</button>
+            <button class="action" type="button" id="signOutBtn">Sign Out</button>
+            <button class="action menu-danger" type="button" id="deleteAccountBtn">Delete Account</button>
+            <span class="menu-hint" id="accountActionStatus"></span>
+          </div>
+        </div>
         <div class="pill" id="totalPill">140 cards</div>
-        <div class="room-dropdown">
+
+        <div class="guest-only room-dropdown dropdown">
           <button
             class="action room-menu-btn"
             type="button"
@@ -474,7 +693,7 @@
           >
             Room <strong id="roomCode">…</strong>
           </button>
-          <div class="room-menu" id="roomMenu" hidden>
+          <div class="room-menu menu-panel" id="roomMenu" hidden>
             <p class="room-menu-label">Join a room</p>
             <input
               id="roomJoinInput"
@@ -490,8 +709,82 @@
               <button class="action" type="button" id="newRoomBtn">New Room</button>
               <button class="action" type="button" id="copyRoomBtn">Copy Link</button>
             </div>
+            <p class="menu-hint">Free mode — no account needed. Sign in to create a lasting relationship.</p>
           </div>
         </div>
+
+        <div class="account-only relationship-dropdown dropdown" hidden>
+          <button
+            class="action room-menu-btn"
+            type="button"
+            id="relationshipMenuBtn"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="relationshipMenu"
+          >
+            Relationship <strong id="relationshipCode">…</strong>
+          </button>
+          <div class="menu-panel" id="relationshipMenu" hidden>
+            <div id="shareRelationshipSection" hidden>
+              <p class="room-menu-label">Share with your partner</p>
+              <input
+                id="inviteLinkDisplay"
+                class="room-input auth-input"
+                type="text"
+                readonly
+                aria-label="Invite link"
+                style="text-transform: none; letter-spacing: normal;"
+              />
+              <div class="room-menu-actions">
+                <button class="action primary" type="button" id="copyInviteLinkBtn">Copy Link</button>
+              </div>
+              <span class="menu-hint" id="inviteStatus"></span>
+            </div>
+            <div id="pendingInvitesSection" hidden>
+              <p class="room-menu-label">Pending invites</p>
+              <div id="pendingInvitesList"></div>
+            </div>
+            <p class="room-menu-label">Your relationships</p>
+            <div id="relationshipList"></div>
+            <p class="room-menu-label">Create relationship</p>
+            <input
+              id="relationshipNameInput"
+              class="room-input"
+              type="text"
+              placeholder="e.g. Us, Family, Friends"
+              maxlength="80"
+              autocomplete="off"
+            />
+            <button class="action primary" type="button" id="createRelationshipBtn">Create</button>
+            <p class="room-menu-label">Or invite by email</p>
+            <input
+              id="inviteEmailInput"
+              class="room-input auth-input"
+              type="email"
+              placeholder="friend@example.com"
+              autocomplete="email"
+              style="text-transform: none; letter-spacing: normal;"
+            />
+            <button class="action" type="button" id="sendInviteBtn">Send Email Invite</button>
+            <p class="room-menu-label">Join a relationship</p>
+            <input
+              id="relationshipJoinInput"
+              class="room-input auth-input"
+              type="text"
+              placeholder="Paste invite link or ID"
+              autocomplete="off"
+              spellcheck="false"
+              style="text-transform: none; letter-spacing: normal;"
+            />
+            <button class="action primary" type="button" id="joinRelationshipBtn">Join</button>
+            <span class="menu-hint" id="joinRelationshipStatus"></span>
+            <p class="room-menu-label">Members</p>
+            <ul class="members-list" id="membersList" hidden></ul>
+          </div>
+        </div>
+
+        <button class="action guest-only" type="button" id="signInBtn">Sign In</button>
+
         <span class="sync-status" id="syncStatus">Connecting…</span>
       </div>
     </header>
@@ -527,6 +820,42 @@
     <div class="counter" id="counter"></div>
   </main>
 
+  <div class="auth-modal" id="authModal" hidden>
+    <div class="auth-modal-backdrop" id="authModalBackdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-close" type="button" id="authModalClose" aria-label="Close">×</button>
+      <h2>Your account</h2>
+      <p class="menu-hint">Sign in to create a relationship, invite your partner with a link, and keep your cards in sync.</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" type="button" id="authTabSignIn">Sign In</button>
+        <button class="auth-tab" type="button" id="authTabSignUp">Sign Up</button>
+      </div>
+      <p class="auth-error" id="authError" hidden></p>
+      <form id="authSignInForm" onsubmit="return false">
+        <div class="auth-field">
+          <label for="authSignInEmail">Email</label>
+          <input class="auth-input" id="authSignInEmail" type="email" autocomplete="email" required />
+        </div>
+        <div class="auth-field">
+          <label for="authSignInPassword">Password</label>
+          <input class="auth-input" id="authSignInPassword" type="password" autocomplete="current-password" required minlength="6" />
+        </div>
+        <button class="action primary" type="button" id="authSignInSubmit" style="width:100%;margin-top:12px;">Sign In</button>
+      </form>
+      <form id="authSignUpForm" hidden onsubmit="return false">
+        <div class="auth-field">
+          <label for="authSignUpEmail">Email</label>
+          <input class="auth-input" id="authSignUpEmail" type="email" autocomplete="email" required />
+        </div>
+        <div class="auth-field">
+          <label for="authSignUpPassword">Password</label>
+          <input class="auth-input" id="authSignUpPassword" type="password" autocomplete="new-password" required minlength="6" />
+        </div>
+        <button class="action primary" type="button" id="authSignUpSubmit" style="width:100%;margin-top:12px;">Create Account</button>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="answerModal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="answerModalTitle">
       <h2 id="answerModalTitle">Answer This Card</h2>
@@ -544,6 +873,7 @@
     </div>
   </div>
 
+  <script src="/js/account.js"></script>
   <script>
     const cards = [
       {
@@ -1656,7 +1986,8 @@
     let currentDeck = [];
     let currentIndex = 0;
     let roomId = null;
-    let roomDbRef = null;
+    let syncDbRef = null;
+    let syncMode = "guest";
     let firebaseReady = false;
     let answersById = {};
     let skippedIds = [];
@@ -1690,8 +2021,14 @@
     const answerSaveBtn = document.getElementById("answerSaveBtn");
     const rootStyle = document.documentElement.style;
 
-    function roomRef() {
-      return window.connectionCardsFirebase.db.ref(`rooms/${roomId}`);
+    function syncRef() {
+      if (!syncDbRef) return window.connectionCardsFirebase.db.ref("rooms/_none");
+      return syncDbRef;
+    }
+
+    function setSyncStatus(text, isError) {
+      syncStatus.textContent = text;
+      syncStatus.classList.toggle("error", !!isError);
     }
 
     function setRoomMenuOpen(open) {
@@ -1757,9 +2094,9 @@
     }
 
     function detachRoomListener() {
-      if (roomDbRef) {
-        roomDbRef.off();
-        roomDbRef = null;
+      if (syncDbRef) {
+        syncDbRef.off();
+        syncDbRef = null;
       }
     }
 
@@ -1770,18 +2107,24 @@
       localStorage.setItem(ROOM_KEY, code);
     }
 
-    function connectToRoom(db, code) {
+    function connectToSyncPath(path, displayLabel, mode) {
       detachRoomListener();
       firebaseReady = false;
       answersById = {};
       skippedIds = [];
-      syncStatus.textContent = "Connecting…";
-      syncStatus.classList.remove("error");
-      updateRoomDisplay(code);
-      roomDbRef = db.ref(`rooms/${code}`);
-      roomDbRef.on("value", handleRoomSnapshot, handleRoomError);
+      syncMode = mode;
+      setSyncStatus("Connecting…");
+      if (mode === "guest") {
+        updateRoomDisplay(displayLabel);
+      }
+      syncDbRef = window.connectionCardsFirebase.db.ref(path);
+      syncDbRef.on("value", handleRoomSnapshot, handleRoomError);
       renderMenu();
       renderCard();
+    }
+
+    function connectToRoom(db, code) {
+      connectToSyncPath(`rooms/${code}`, code, "guest");
     }
 
     function switchToRoom(code) {
@@ -1807,21 +2150,18 @@
     }
 
     async function initFirebase() {
-      try {
-        const { auth, db } = window.connectionCardsFirebase;
-        syncStatus.textContent = "Connecting…";
-        await auth.signInAnonymously();
-
-        if (new URLSearchParams(location.search).get("room")) {
-          history.replaceState(null, "", location.pathname);
-        }
-
-        connectToRoom(db, getOrCreateRoomId());
-      } catch (error) {
-        syncStatus.textContent = "Could not connect";
-        syncStatus.classList.add("error");
-        console.error(error);
-      }
+      ConnectionCardsAccount.init({
+        connectGuest() {
+          if (new URLSearchParams(location.search).get("room")) {
+            history.replaceState(null, "", location.pathname);
+          }
+          connectToRoom(window.connectionCardsFirebase.db, getOrCreateRoomId());
+        },
+        connectRelationship(relationshipId, name) {
+          connectToSyncPath(`relationships/${relationshipId}`, name, "relationship");
+        },
+        setSyncStatus
+      });
     }
 
     const categoryThemes = {
@@ -2003,17 +2343,27 @@
       return skippedIds.includes(Number(cardId));
     }
 
+    function needsRelationshipSync() {
+      return syncMode === "relationship" && !firebaseReady;
+    }
+
+    function warnIfNotSynced() {
+      if (!needsRelationshipSync()) return false;
+      window.alert("Create or join a relationship first to save cards and answers.");
+      return true;
+    }
+
     async function skipCard(cardId) {
       if (!firebaseReady) return;
       const id = Number(cardId);
       if (!skippedIds.includes(id)) {
-        await roomRef().child(`skipped/${id}`).set(true);
+        await syncRef().child(`skipped/${id}`).set(true);
       }
     }
 
     async function unskipCard(cardId) {
       if (!firebaseReady) return;
-      await roomRef().child(`skipped/${cardId}`).remove();
+      await syncRef().child(`skipped/${cardId}`).remove();
     }
 
     function getDeckForCategory(category) {
@@ -2062,7 +2412,7 @@
       const deleteBtn = document.getElementById("deleteAnswerBtn");
       deleteBtn.addEventListener("click", async () => {
         if (!firebaseReady) return;
-        await roomRef().child(`answers/${card.id}`).remove();
+        await syncRef().child(`answers/${card.id}`).remove();
 
         currentDeck = getDeckForCategory(activeCategory);
         currentIndex = Math.min(currentIndex, Math.max(0, currentDeck.length - 1));
@@ -2119,13 +2469,13 @@
 
       answerSaveBtn.disabled = true;
       try {
-        await roomRef().child(`answers/${modalCardId}`).set({
+        await syncRef().child(`answers/${modalCardId}`).set({
           answer: trimmedAnswer || "Done",
           question: getCardText(card),
           type: card.type || "question",
           answeredAt: firebase.database.ServerValue.TIMESTAMP
         });
-        await roomRef().child(`skipped/${modalCardId}`).remove();
+        await syncRef().child(`skipped/${modalCardId}`).remove();
         closeAnswerModal();
 
         currentDeck = getDeckForCategory(activeCategory);
@@ -2245,6 +2595,7 @@
     skipBtn.addEventListener("click", () => {
       const card = currentDeck[currentIndex];
       if (!card || activeCategory === ANSWERED_CATEGORY || activeCategory === SKIPPED_CATEGORY) return;
+      if (warnIfNotSynced()) return;
 
       skipCard(card.id);
 
@@ -2257,6 +2608,7 @@
     answerBtn.addEventListener("click", () => {
       const card = currentDeck[currentIndex];
       if (!card || activeCategory === ANSWERED_CATEGORY) return;
+      if (warnIfNotSynced()) return;
       openAnswerModal(card);
     });
 
