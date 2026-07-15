@@ -324,54 +324,56 @@
       flex-wrap: wrap;
     }
 
-    .room-panel {
-      display: grid;
-      gap: 12px;
-      padding: 14px 16px;
-      background: rgba(255,255,255,.5);
-      border: 1px solid rgba(255,255,255,.7);
-      border-radius: 20px;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
+    .room-dropdown {
+      position: relative;
     }
 
-    .room-panel-top {
-      display: flex;
-      justify-content: space-between;
+    .room-menu-btn {
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 6px;
+      white-space: nowrap;
     }
 
-    .room-current {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    .room-current strong {
-      color: var(--ink);
-      font-size: 1rem;
+    .room-menu-btn strong {
       letter-spacing: 0.06em;
     }
 
-    .room-controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
+    .room-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 20;
+      width: min(280px, calc(100vw - 32px));
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(83, 38, 86, .16);
+    }
+
+    .room-menu[hidden] {
+      display: none;
+    }
+
+    .room-menu-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .room-input {
-      flex: 1 1 160px;
-      min-width: 140px;
+      width: 100%;
       padding: 10px 14px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.85);
-      background: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.95);
       color: var(--ink);
       font: inherit;
       font-weight: 700;
@@ -386,8 +388,18 @@
       font-weight: 600;
     }
 
+    .room-menu-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .room-menu-actions .action:last-child {
+      grid-column: 1 / -1;
+    }
+
     .room-bar .action,
-    .room-panel .action {
+    .room-menu .action {
       padding: 10px 14px;
       font-size: 0.85rem;
     }
@@ -451,32 +463,38 @@
       </div>
       <div class="room-bar">
         <div class="pill" id="totalPill">140 cards</div>
+        <div class="room-dropdown">
+          <button
+            class="action room-menu-btn"
+            type="button"
+            id="roomMenuBtn"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="roomMenu"
+          >
+            Room <strong id="roomCode">…</strong>
+          </button>
+          <div class="room-menu" id="roomMenu" hidden>
+            <p class="room-menu-label">Join a room</p>
+            <input
+              id="roomJoinInput"
+              class="room-input"
+              type="text"
+              placeholder="Enter room code"
+              maxlength="12"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div class="room-menu-actions">
+              <button class="action primary" type="button" id="joinRoomBtn">Join</button>
+              <button class="action" type="button" id="newRoomBtn">New Room</button>
+              <button class="action" type="button" id="copyRoomBtn">Copy Link</button>
+            </div>
+          </div>
+        </div>
         <span class="sync-status" id="syncStatus">Connecting…</span>
       </div>
     </header>
-
-    <section class="room-panel" aria-label="Room controls">
-      <div class="room-panel-top">
-        <div class="room-current">
-          <span>Room</span>
-          <strong id="roomCode">…</strong>
-        </div>
-        <button class="action" type="button" id="copyRoomBtn">Copy Link</button>
-      </div>
-      <div class="room-controls">
-        <input
-          id="roomJoinInput"
-          class="room-input"
-          type="text"
-          placeholder="Enter room code to join"
-          maxlength="12"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button class="action primary" type="button" id="joinRoomBtn">Join Room</button>
-        <button class="action" type="button" id="newRoomBtn">New Room</button>
-      </div>
-    </section>
 
     <div class="content">
       <nav class="menu" id="categoryMenu"></nav>
@@ -1655,6 +1673,8 @@
     const counter = document.getElementById("counter");
     const totalPill = document.getElementById("totalPill");
     const roomCodeEl = document.getElementById("roomCode");
+    const roomMenuBtn = document.getElementById("roomMenuBtn");
+    const roomMenu = document.getElementById("roomMenu");
     const roomJoinInput = document.getElementById("roomJoinInput");
     const joinRoomBtn = document.getElementById("joinRoomBtn");
     const newRoomBtn = document.getElementById("newRoomBtn");
@@ -1672,6 +1692,16 @@
 
     function roomRef() {
       return window.connectionCardsFirebase.db.ref(`rooms/${roomId}`);
+    }
+
+    function setRoomMenuOpen(open) {
+      roomMenu.hidden = !open;
+      roomMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) roomJoinInput.focus();
+    }
+
+    function toggleRoomMenu() {
+      setRoomMenuOpen(roomMenu.hidden);
     }
 
     function normalizeRoomCode(value) {
@@ -1768,10 +1798,12 @@
         return;
       }
       connectToRoom(window.connectionCardsFirebase.db, normalized);
+      setRoomMenuOpen(false);
     }
 
     function startNewRoom() {
       connectToRoom(window.connectionCardsFirebase.db, generateRoomCode());
+      setRoomMenuOpen(false);
     }
 
     async function initFirebase() {
@@ -2240,9 +2272,15 @@
     });
 
     document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && !answerModal.hidden) {
-        closeAnswerModal();
-        return;
+      if (event.key === "Escape") {
+        if (!answerModal.hidden) {
+          closeAnswerModal();
+          return;
+        }
+        if (!roomMenu.hidden) {
+          setRoomMenuOpen(false);
+          return;
+        }
       }
 
       const targetTag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
@@ -2252,6 +2290,17 @@
       if (event.key === "ArrowRight" || event.key === " ") nextCard();
       if (event.key === "ArrowLeft") previousCard();
       if (event.key.toLowerCase() === "s") shuffleDeck();
+    });
+
+    roomMenuBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      toggleRoomMenu();
+    });
+
+    document.addEventListener("click", event => {
+      if (!roomMenu.hidden && !event.target.closest(".room-dropdown")) {
+        setRoomMenuOpen(false);
+      }
     });
 
     copyRoomBtn.addEventListener("click", async () => {
@@ -2268,22 +2317,29 @@
       }
     });
 
-    joinRoomBtn.addEventListener("click", () => {
+    joinRoomBtn.addEventListener("click", event => {
+      event.stopPropagation();
       if (!window.connectionCardsFirebase?.db) return;
       switchToRoom(roomJoinInput.value);
     });
 
-    newRoomBtn.addEventListener("click", () => {
+    newRoomBtn.addEventListener("click", event => {
+      event.stopPropagation();
       if (!window.connectionCardsFirebase?.db) return;
       startNewRoom();
     });
 
     roomJoinInput.addEventListener("keydown", event => {
+      event.stopPropagation();
       if (event.key === "Enter") {
         event.preventDefault();
         if (!window.connectionCardsFirebase?.db) return;
         switchToRoom(roomJoinInput.value);
       }
+    });
+
+    roomMenu.addEventListener("click", event => {
+      event.stopPropagation();
     });
 
     currentDeck = getDeckForCategory(activeCategory);
