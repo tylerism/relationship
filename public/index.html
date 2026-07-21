@@ -577,6 +577,12 @@
       font-weight: 600;
     }
 
+    .answer-entry + .answer-entry {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(126, 102, 135, .16);
+    }
+
     .auth-modal {
       position: fixed;
       inset: 0;
@@ -761,7 +767,7 @@
               <button class="action" type="button" id="newRoomBtn">New Room</button>
               <button class="action" type="button" id="copyRoomBtn">Copy Link</button>
             </div>
-            <p class="menu-hint">Free mode — no account needed. Sign in to create a lasting relationship.</p>
+            <p class="menu-hint">Signed-in accounts sync card progress with people in your relationship only.</p>
           </div>
         </div>
 
@@ -875,7 +881,7 @@
     <div class="auth-modal-card">
       <button class="auth-close" type="button" id="authModalClose" aria-label="Close">×</button>
       <h2>Your account</h2>
-      <p class="menu-hint">Sign in to create a relationship, invite your partner with a link, and keep your cards in sync.</p>
+      <p class="menu-hint">Sign in to create a relationship and sync cards with your partner. Signed-in accounts do not use room codes.</p>
       <div class="auth-tabs">
         <button class="auth-tab active" type="button" id="authTabSignIn">Sign In</button>
         <button class="auth-tab" type="button" id="authTabSignUp">Sign Up</button>
@@ -2038,6 +2044,8 @@
     let roomId = null;
     let syncDbRef = null;
     let syncMode = "guest";
+    let answersByMember = {};
+    let skippedByMember = {};
     let firebaseReady = false;
     let answersById = {};
     let skippedIds = [];
@@ -2140,13 +2148,63 @@
       return normalizeRoomCode(stored) || generateRoomCode();
     }
 
-    function handleRoomSnapshot(snapshot) {
-      const data = snapshot.val() || {};
+    function isRelationshipSync() {
+      return syncMode === "relationship";
+    }
+
+    function rebuildDerivedAnswerState() {
       answersById = {};
-      for (const [id, entry] of Object.entries(data.answers || {})) {
-        answersById[id] = entry.answer || "";
+      skippedIds = [];
+      for (const [cardId, members] of Object.entries(answersByMember)) {
+        const hasAnswer = Object.values(members).some(answer => String(answer || "").trim().length > 0);
+        if (hasAnswer) answersById[cardId] = getOwnAnswer(cardId) || Object.values(members).find(answer => String(answer || "").trim()) || "";
       }
-      skippedIds = Object.keys(data.skipped || {}).map(Number);
+      for (const [cardId, members] of Object.entries(skippedByMember)) {
+        const hasSkip = Object.keys(members).length > 0;
+        if (hasSkip && !answersById[cardId]) skippedIds.push(Number(cardId));
+      }
+    }
+
+    function getOwnAnswer(cardId) {
+      const uid = window.ConnectionCardsAccount?.getCurrentUserId?.();
+      if (!uid || !answersByMember[String(cardId)]) return "";
+      return answersByMember[String(cardId)][uid] || "";
+    }
+
+    function getMemberAnswers(cardId) {
+      const members = answersByMember[String(cardId)] || {};
+      const relationshipMembers = window.ConnectionCardsAccount?.getRelationshipMembers?.() || {};
+      return Object.entries(members)
+        .filter(([, answer]) => String(answer || "").trim().length > 0)
+        .map(([uid, answer]) => ({
+          uid,
+          email: relationshipMembers[uid]?.email || "Partner",
+          answer
+        }));
+    }
+
+    function handleSyncSnapshot(snapshot) {
+      const data = snapshot.val() || {};
+      if (isRelationshipSync()) {
+        answersByMember = {};
+        skippedByMember = {};
+        for (const [cardId, members] of Object.entries(data.answers || {})) {
+          answersByMember[cardId] = {};
+          for (const [uid, entry] of Object.entries(members || {})) {
+            answersByMember[cardId][uid] = entry.answer || "";
+          }
+        }
+        for (const [cardId, members] of Object.entries(data.skipped || {})) {
+          skippedByMember[cardId] = members || {};
+        }
+        rebuildDerivedAnswerState();
+      } else {
+        answersById = {};
+        for (const [id, entry] of Object.entries(data.answers || {})) {
+          answersById[id] = entry.answer || "";
+        }
+        skippedIds = Object.keys(data.skipped || {}).map(Number);
+      }
       firebaseReady = true;
       syncStatus.textContent = "Synced";
       syncStatus.classList.remove("error");
@@ -2155,17 +2213,34 @@
       renderCard();
     }
 
-    function handleRoomError(error) {
+    function handleSyncError(error) {
       syncStatus.textContent = "Sync error";
       syncStatus.classList.add("error");
       console.error(error);
     }
 
-    function detachRoomListener() {
+    function detachSyncListener() {
       if (syncDbRef) {
         syncDbRef.off();
         syncDbRef = null;
       }
+    }
+
+    function clearSyncState() {
+      answersById = {};
+      skippedIds = [];
+      answersByMember = {};
+      skippedByMember = {};
+      firebaseReady = false;
+    }
+
+    function disconnectSync(message) {
+      detachSyncListener();
+      clearSyncState();
+      syncMode = "idle";
+      setSyncStatus(message || "Not synced");
+      renderMenu();
+      renderCard();
     }
 
     function updateRoomDisplay(code) {
@@ -2176,26 +2251,29 @@
     }
 
     function connectToSyncPath(path, displayLabel, mode) {
-      detachRoomListener();
-      firebaseReady = false;
-      answersById = {};
-      skippedIds = [];
+      detachSyncListener();
+      clearSyncState();
       syncMode = mode;
       setSyncStatus("Connecting…");
       if (mode === "guest") {
         updateRoomDisplay(displayLabel);
       }
       syncDbRef = window.connectionCardsFirebase.db.ref(path);
-      syncDbRef.on("value", handleRoomSnapshot, handleRoomError);
+      syncDbRef.on("value", handleSyncSnapshot, handleSyncError);
       renderMenu();
       renderCard();
     }
 
     function connectToRoom(db, code) {
+      if (window.ConnectionCardsAccount?.isLoggedIn?.()) return;
       connectToSyncPath(`rooms/${code}`, code, "guest");
     }
 
     function switchToRoom(code) {
+      if (window.ConnectionCardsAccount?.isLoggedIn?.()) {
+        window.alert("Signed-in accounts sync through relationships, not rooms.");
+        return;
+      }
       const normalized = normalizeRoomCode(code);
       if (!normalized) {
         window.alert("Enter a valid room code (letters and numbers).");
@@ -2213,6 +2291,7 @@
     }
 
     function startNewRoom() {
+      if (window.ConnectionCardsAccount?.isLoggedIn?.()) return;
       connectToRoom(window.connectionCardsFirebase.db, generateRoomCode());
       setRoomMenuOpen(false);
     }
@@ -2220,13 +2299,20 @@
     async function initFirebase() {
       ConnectionCardsAccount.init({
         connectGuest() {
+          if (window.ConnectionCardsAccount?.isLoggedIn?.()) return;
           if (new URLSearchParams(location.search).get("room")) {
             history.replaceState(null, "", location.pathname);
           }
           connectToRoom(window.connectionCardsFirebase.db, getOrCreateRoomId());
         },
         connectRelationship(relationshipId, name) {
+          if (new URLSearchParams(location.search).get("room")) {
+            history.replaceState(null, "", location.pathname);
+          }
           connectToSyncPath(`relationships/${relationshipId}`, name, "relationship");
+        },
+        disconnectSync(message) {
+          disconnectSync(message);
         },
         setSyncStatus
       });
@@ -2400,38 +2486,66 @@
     }
 
     function getAnswer(cardId) {
+      if (isRelationshipSync()) return getOwnAnswer(cardId);
       return answersById[String(cardId)] || "";
     }
 
     function isAnswered(cardId) {
+      if (isRelationshipSync()) {
+        const members = answersByMember[String(cardId)] || {};
+        return Object.values(members).some(answer => String(answer || "").trim().length > 0);
+      }
       return getAnswer(cardId).trim().length > 0;
     }
 
     function isSkipped(cardId) {
+      if (isRelationshipSync()) {
+        const members = skippedByMember[String(cardId)] || {};
+        return Object.keys(members).length > 0 && !isAnswered(cardId);
+      }
       return skippedIds.includes(Number(cardId));
     }
 
     function needsRelationshipSync() {
-      return syncMode === "relationship" && !firebaseReady;
+      return window.ConnectionCardsAccount?.isLoggedIn?.() && !firebaseReady;
     }
 
     function warnIfNotSynced() {
-      if (!needsRelationshipSync()) return false;
-      window.alert("Create or join a relationship first to save cards and answers.");
+      if (!window.ConnectionCardsAccount?.isLoggedIn?.()) return false;
+      if (firebaseReady) return false;
+      window.alert("Create or join a relationship first. Signed-in accounts only sync with people in your relationship.");
       return true;
+    }
+
+    function getAnswerWritePath(cardId) {
+      const uid = window.ConnectionCardsAccount?.getCurrentUserId?.();
+      if (isRelationshipSync() && uid) return `answers/${cardId}/${uid}`;
+      return `answers/${cardId}`;
+    }
+
+    function getSkipWritePath(cardId) {
+      const uid = window.ConnectionCardsAccount?.getCurrentUserId?.();
+      if (isRelationshipSync() && uid) return `skipped/${cardId}/${uid}`;
+      return `skipped/${cardId}`;
     }
 
     async function skipCard(cardId) {
       if (!firebaseReady) return;
       const id = Number(cardId);
+      if (isRelationshipSync()) {
+        const uid = window.ConnectionCardsAccount?.getCurrentUserId?.();
+        if (!uid || skippedByMember[String(id)]?.[uid]) return;
+        await syncRef().child(getSkipWritePath(id)).set(true);
+        return;
+      }
       if (!skippedIds.includes(id)) {
-        await syncRef().child(`skipped/${id}`).set(true);
+        await syncRef().child(getSkipWritePath(id)).set(true);
       }
     }
 
     async function unskipCard(cardId) {
       if (!firebaseReady) return;
-      await syncRef().child(`skipped/${cardId}`).remove();
+      await syncRef().child(getSkipWritePath(cardId)).remove();
     }
 
     function getDeckForCategory(category) {
@@ -2467,20 +2581,40 @@
 
       answerPanel.hidden = false;
       const completed = isActionCard(card);
+      const memberAnswers = isRelationshipSync() ? getMemberAnswers(card.id) : [];
       const saved = getAnswer(card.id);
-      const displayAnswer = completed && saved === "Done" ? "Completed ✓" : saved;
+      const displayBlocks = memberAnswers.length
+        ? memberAnswers.map(member => {
+            const completed = isActionCard(card);
+            const displayAnswer = completed && member.answer === "Done"
+              ? "Completed ✓"
+              : member.answer;
+            return `
+              <div class="answer-entry">
+                <p class="answer-title">${escapeHtml(member.email)}</p>
+                <p class="answer-text">${escapeHtml(displayAnswer)}</p>
+              </div>
+            `;
+          }).join("")
+        : `
+          <p class="answer-title">${completed ? "Completed Action" : "Saved Answer"}</p>
+          <p class="answer-text">${escapeHtml(completed && saved === "Done" ? "Completed ✓" : saved)}</p>
+        `;
+      const canDeleteOwn = isRelationshipSync()
+        ? saved.trim().length > 0
+        : true;
       answerPanel.innerHTML = `
-        <p class="answer-title">${completed ? "Completed Action" : "Saved Answer"}</p>
-        <p class="answer-text">${escapeHtml(displayAnswer)}</p>
+        ${displayBlocks}
         <div class="controls">
-          <button class="action danger" id="deleteAnswerBtn">${completed ? "Undo Completion" : "Delete Answer"}</button>
+          ${canDeleteOwn ? `<button class="action danger" id="deleteAnswerBtn">${completed ? "Undo Completion" : "Delete Answer"}</button>` : ""}
         </div>
       `;
 
       const deleteBtn = document.getElementById("deleteAnswerBtn");
+      if (!deleteBtn) return;
       deleteBtn.addEventListener("click", async () => {
         if (!firebaseReady) return;
-        await syncRef().child(`answers/${card.id}`).remove();
+        await syncRef().child(getAnswerWritePath(card.id)).remove();
 
         currentDeck = getDeckForCategory(activeCategory);
         currentIndex = Math.min(currentIndex, Math.max(0, currentDeck.length - 1));
@@ -2537,13 +2671,13 @@
 
       answerSaveBtn.disabled = true;
       try {
-        await syncRef().child(`answers/${modalCardId}`).set({
+        await syncRef().child(getAnswerWritePath(modalCardId)).set({
           answer: trimmedAnswer || "Done",
           question: getCardText(card),
           type: card.type || "question",
           answeredAt: firebase.database.ServerValue.TIMESTAMP
         });
-        await syncRef().child(`skipped/${modalCardId}`).remove();
+        await syncRef().child(getSkipWritePath(modalCardId)).remove();
         closeAnswerModal();
 
         currentDeck = getDeckForCategory(activeCategory);
@@ -2740,6 +2874,7 @@
     });
 
     copyRoomBtn.addEventListener("click", async () => {
+      if (window.ConnectionCardsAccount?.isLoggedIn?.()) return;
       if (!roomId) return;
       const url = `${location.origin}${location.pathname}?room=${roomId}`;
       try {

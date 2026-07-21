@@ -592,6 +592,10 @@
 
   async function enterAccountMode(user) {
     setMode("account");
+    sync?.disconnectSync?.("Create or join a relationship to sync cards");
+    if (new URLSearchParams(location.search).get("room")) {
+      history.replaceState(null, "", location.pathname);
+    }
     await ensureUserProfile(user);
     await loadUserRelationships(user.uid);
     listenPendingInvites(user);
@@ -748,6 +752,13 @@
     },
     isLoggedIn() {
       return isAccountUser(currentUser);
+    },
+    getCurrentUserId() {
+      return currentUser?.uid || null;
+    },
+    getRelationshipMembers() {
+      if (!activeRelationshipId) return {};
+      return relationships[activeRelationshipId]?.members || {};
     },
     getActiveRelationshipId() {
       return activeRelationshipId;

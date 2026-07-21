@@ -2,8 +2,8 @@
   "rules": {
     "rooms": {
       "$roomId": {
-        ".read": "auth != null",
-        ".write": "auth != null",
+        ".read": "auth != null && auth.token.firebase.sign_in_provider == 'anonymous'",
+        ".write": "auth != null && auth.token.firebase.sign_in_provider == 'anonymous'",
         "answers": {
           "$cardId": {
             ".validate": "newData.hasChildren(['answer', 'question']) && newData.child('answer').isString() && newData.child('question').isString() && (!newData.hasChild('type') || newData.child('type').isString())"
@@ -72,12 +72,20 @@
         },
         "answers": {
           "$cardId": {
-            ".validate": "newData.hasChildren(['answer', 'question']) && newData.child('answer').isString() && newData.child('question').isString() && (!newData.hasChild('type') || newData.child('type').isString())"
+            "$memberUid": {
+              ".read": "auth != null && root.child('relationships').child($relationshipId).child('members').child(auth.uid).exists()",
+              ".write": "auth != null && auth.uid == $memberUid && root.child('relationships').child($relationshipId).child('members').child(auth.uid).exists()",
+              ".validate": "newData.hasChildren(['answer', 'question']) && newData.child('answer').isString() && newData.child('question').isString() && (!newData.hasChild('type') || newData.child('type').isString())"
+            }
           }
         },
         "skipped": {
           "$cardId": {
-            ".validate": "newData.isBoolean() && newData.val() === true"
+            "$memberUid": {
+              ".read": "auth != null && root.child('relationships').child($relationshipId).child('members').child(auth.uid).exists()",
+              ".write": "auth != null && auth.uid == $memberUid && root.child('relationships').child($relationshipId).child('members').child(auth.uid).exists()",
+              ".validate": "newData.isBoolean() && newData.val() === true"
+            }
           }
         }
       }
