@@ -2492,16 +2492,16 @@
 
     function isAnswered(cardId) {
       if (isRelationshipSync()) {
-        const members = answersByMember[String(cardId)] || {};
-        return Object.values(members).some(answer => String(answer || "").trim().length > 0);
+        return getOwnAnswer(cardId).trim().length > 0;
       }
       return getAnswer(cardId).trim().length > 0;
     }
 
     function isSkipped(cardId) {
       if (isRelationshipSync()) {
+        const uid = window.ConnectionCardsAccount?.getCurrentUserId?.();
         const members = skippedByMember[String(cardId)] || {};
-        return Object.keys(members).length > 0 && !isAnswered(cardId);
+        return !!uid && members[uid] === true && !isAnswered(cardId);
       }
       return skippedIds.includes(Number(cardId));
     }
