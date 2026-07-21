@@ -118,7 +118,7 @@
 
     .content {
       display: grid;
-      grid-template-columns: 210px 1fr;
+      grid-template-columns: 1fr;
       gap: 20px;
       align-items: start;
     }
@@ -146,40 +146,63 @@
       font-weight: 700;
     }
 
-    .menu {
-      display: flex;
-      gap: 10px;
-      flex-direction: column;
-      padding: 12px;
-      background: rgba(255,255,255,.45);
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: 24px;
-      backdrop-filter: blur(14px);
-      position: sticky;
-      top: 24px;
-    }
-
     button {
       border: 0;
       cursor: pointer;
       font: inherit;
     }
 
-    .category-btn {
-      padding: 10px 14px;
-      border-radius: 999px;
-      color: var(--ink);
-      background: rgba(255,255,255,.72);
-      font-weight: 800;
-      text-align: left;
-      transition: transform .16s ease, background .16s ease, color .16s ease;
+    .category-picker {
+      width: min(650px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 7px;
     }
 
-    .category-btn:hover { transform: translateY(-2px); }
+    .category-picker label {
+      padding-left: 4px;
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-    .category-btn.active {
+    .category-select-wrap {
+      position: relative;
+    }
+
+    .category-select-wrap::after {
+      content: "⌄";
+      position: absolute;
+      top: 50%;
+      right: 18px;
+      transform: translateY(-58%);
       color: white;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-size: 1.25rem;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    .category-select {
+      width: 100%;
+      appearance: none;
+      padding: 13px 48px 13px 18px;
+      border: 0;
+      border-radius: 16px;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      box-shadow: 0 12px 30px var(--glow);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .category-select:focus-visible {
+      outline: 3px solid rgba(255,255,255,.92);
+      outline-offset: 3px;
     }
 
     .stage {
@@ -489,17 +512,8 @@
 
     @media (max-width: 640px) {
       body { padding: 14px; }
-      .content {
-        grid-template-columns: 1fr;
-      }
-      .menu {
-        flex-direction: row;
-        flex-wrap: wrap;
-        position: static;
-      }
       .stage { min-height: 420px; }
       .card { min-height: 340px; border-radius: 30px; }
-      .category-btn { flex: 1 1 auto; }
       .action { flex: 1; }
     }
 
@@ -966,7 +980,12 @@
     </header>
 
     <div class="content">
-      <nav class="menu" id="categoryMenu"></nav>
+      <div class="category-picker">
+        <label for="categorySelect">Choose a category</label>
+        <div class="category-select-wrap">
+          <select class="category-select" id="categorySelect" aria-label="Choose a card category"></select>
+        </div>
+      </div>
 
       <section class="stage" id="cardStage">
         <article class="card" id="cardSurface">
@@ -2179,7 +2198,7 @@
     let skippedIds = [];
     let modalCardId = null;
 
-    const menu = document.getElementById("categoryMenu");
+    const categorySelect = document.getElementById("categorySelect");
     const cardStage = document.getElementById("cardStage");
     const answeredPage = document.getElementById("answeredPage");
     const answeredGrid = document.getElementById("answeredGrid");
@@ -2840,21 +2859,18 @@
     }
 
     function renderMenu() {
-      menu.innerHTML = "";
-      categories.forEach(category => {
-        const btn = document.createElement("button");
-        btn.className = "category-btn" + (category === activeCategory ? " active" : "");
-        btn.textContent = category;
-        btn.addEventListener("click", () => {
-          activeCategory = category;
-          currentDeck = getDeckForCategory(category);
-          currentIndex = 0;
-          applyTheme(category);
-          renderMenu();
-          renderCard();
-        });
-        menu.appendChild(btn);
-      });
+      categorySelect.innerHTML = categories
+        .map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
+        .join("");
+      categorySelect.value = activeCategory;
+      categorySelect.onchange = () => {
+        activeCategory = categorySelect.value;
+        currentDeck = getDeckForCategory(activeCategory);
+        currentIndex = 0;
+        applyTheme(activeCategory);
+        renderMenu();
+        renderCard();
+      };
     }
 
     function renderAnsweredPage() {
