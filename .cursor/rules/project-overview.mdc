@@ -1,0 +1,29 @@
+---
+description: Connection Cards project context, stack, and guardrails
+alwaysApply: true
+---
+
+# Connection Cards
+
+Firebase-hosted couples card app. Vanilla JS monolith in `public/index.html`, Python dev server, Firebase RTDB sync via room codes.
+
+## Stack
+
+- Frontend: HTML/CSS/JS (no bundler, no npm frontend deps)
+- Backend: Firebase Realtime Database + anonymous Auth
+- Hosting: Firebase Hosting (CI deploy on `main`)
+- Local dev: `python3 server.py` + optional `firebase emulators:start`
+
+## Critical facts
+
+- Live database is **Realtime Database** (`database.rules.json`), not Firestore
+- Firebase config: `public/js/firebase-init.js`
+- Card data: `cards` array inside `public/index.html`
+- Room path: `rooms/{roomId}/answers/{cardId}` and `rooms/{roomId}/skipped/{cardId}`
+
+## When making changes
+
+- Minimize scope; match existing code style
+- Read `AGENTS.md` for commands and verification steps
+- Use Firebase skills in `.agents/skills/` for hosting, auth, and rules work
+- Only commit when the user explicitly asks

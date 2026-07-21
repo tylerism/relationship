@@ -1,0 +1,45 @@
+---
+description: Firebase config, RTDB rules, and emulator patterns for Connection Cards
+globs: firebase.json,.firebaserc,database.rules.json,firestore.rules,public/js/firebase-init.js
+alwaysApply: false
+---
+
+# Firebase patterns
+
+## Database
+
+This app uses **Firebase Realtime Database**, not Firestore. Data model:
+
+```
+rooms/{roomId}/
+  answers/{cardId}/  → { answer, question, type?, answeredAt }
+  skipped/{cardId}/  → true
+```
+
+## Security rules (`database.rules.json`)
+
+- Read/write requires `auth != null` (anonymous auth satisfies this)
+- `answers` entries must include string `answer` and `question`; optional `type` string
+- `skipped` entries must be boolean `true`
+
+Before deploying rule changes, test with emulators and consider the `firebase-security-rules-auditor` skill.
+
+## Emulators (`firebase.json`)
+
+| Service | Port |
+|---------|------|
+| Auth    | 9099 |
+| RTDB    | 9000 |
+| Hosting | 5000 |
+
+`firebase-init.js` connects to emulators when hostname is `localhost` or `127.0.0.1`.
+
+## Deploy
+
+- Live hosting: auto-deploy via GitHub Actions on merge to `main`
+- Manual: `firebase deploy --only hosting,database`
+- Project ID: `relationships-d7fce` (see `.firebaserc`)
+
+## CLI version
+
+Always use latest Firebase CLI: `npx -y firebase-tools@latest --version`
