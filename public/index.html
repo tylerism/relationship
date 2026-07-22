@@ -350,6 +350,25 @@
       white-space: pre-wrap;
     }
 
+    .answered-card-response + .answered-card-response {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(126, 102, 135, .16);
+    }
+
+    .answered-card-own-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .answered-card-cta {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(126, 102, 135, .16);
+    }
+
     .answered-card-actions {
       display: flex;
       gap: 8px;
@@ -828,6 +847,31 @@
       display: none;
     }
 
+    .settings-section {
+      display: grid;
+      gap: 10px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(126, 102, 135, .14);
+    }
+
+    .settings-section:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .settings-section h3 {
+      margin: 0;
+      font-size: 0.9rem;
+      letter-spacing: -.02em;
+    }
+
+    .settings-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
     .auth-close {
       position: absolute;
       top: 12px;
@@ -980,7 +1024,7 @@
             <span class="hamburger-icon" aria-hidden="true"></span>
           </button>
           <div class="menu-panel account-menu-panel" id="accountMenuPanel" hidden>
-            <a class="action menu-item" href="/settings.html">Settings</a>
+            <button class="action menu-item" type="button" id="settingsBtn">Settings</button>
             <button class="action" type="button" id="signOutBtn">Sign Out</button>
           </div>
         </div>
@@ -1061,6 +1105,55 @@
         </div>
         <button class="action primary" type="button" id="authSignUpSubmit" style="width:100%;margin-top:12px;">Create Account</button>
       </form>
+    </div>
+  </div>
+
+  <div class="auth-modal" id="settingsModal" hidden>
+    <div class="auth-modal-backdrop" id="settingsModalBackdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-close" type="button" id="settingsModalClose" aria-label="Close">×</button>
+      <h2>Settings</h2>
+      <p class="menu-hint">Update your profile and sign-in details.</p>
+      <p class="settings-status" id="settingsStatus"></p>
+
+      <div class="settings-section">
+        <h3>Display name</h3>
+        <div class="auth-field">
+          <label for="settingsDisplayName">Name</label>
+          <input class="auth-input" id="settingsDisplayName" type="text" maxlength="80" autocomplete="name" placeholder="How your partner sees you" />
+        </div>
+        <button class="action primary" type="button" id="settingsSaveNameBtn">Save Name</button>
+      </div>
+
+      <div class="settings-section">
+        <h3>Email address</h3>
+        <div class="auth-field">
+          <label for="settingsEmail">Email</label>
+          <input class="auth-input" id="settingsEmail" type="email" autocomplete="email" />
+        </div>
+        <div class="auth-field">
+          <label for="settingsEmailPassword">Current password</label>
+          <input class="auth-input" id="settingsEmailPassword" type="password" autocomplete="current-password" />
+        </div>
+        <button class="action primary" type="button" id="settingsUpdateEmailBtn">Update Email</button>
+      </div>
+
+      <div class="settings-section">
+        <h3>Password</h3>
+        <div class="auth-field">
+          <label for="settingsCurrentPassword">Current password</label>
+          <input class="auth-input" id="settingsCurrentPassword" type="password" autocomplete="current-password" />
+        </div>
+        <div class="auth-field">
+          <label for="settingsNewPassword">New password</label>
+          <input class="auth-input" id="settingsNewPassword" type="password" autocomplete="new-password" minlength="6" />
+        </div>
+        <div class="auth-field">
+          <label for="settingsConfirmPassword">Confirm new password</label>
+          <input class="auth-input" id="settingsConfirmPassword" type="password" autocomplete="new-password" minlength="6" />
+        </div>
+        <button class="action primary" type="button" id="settingsUpdatePasswordBtn">Change Password</button>
+      </div>
     </div>
   </div>
 
@@ -2311,13 +2404,27 @@
     function getMemberAnswers(cardId) {
       const members = answersByMember[String(cardId)] || {};
       const relationshipMembers = window.ConnectionCardsAccount?.getRelationshipMembers?.() || {};
+      const currentUid = window.ConnectionCardsAccount?.getCurrentUserId?.();
       return Object.entries(members)
         .filter(([, answer]) => String(answer || "").trim().length > 0)
         .map(([uid, answer]) => ({
           uid,
-          email: relationshipMembers[uid]?.email || "Partner",
-          answer
+          displayName: window.ConnectionCardsAccount?.getDisplayName?.(uid) || relationshipMembers[uid]?.email || "Partner",
+          answer,
+          isOwn: uid === currentUid
         }));
+    }
+
+    function cardHasRelationshipAnswers(cardId) {
+      const members = answersByMember[String(cardId)] || {};
+      return Object.values(members).some(answer => String(answer || "").trim().length > 0);
+    }
+
+    function getAnswerLabel(member, isAction) {
+      if (member.isOwn) {
+        return isAction ? "Your completion" : "Your answer";
+      }
+      return isAction ? `${member.displayName}'s completion` : `${member.displayName}'s answer`;
     }
 
     function handleSyncSnapshot(snapshot) {
@@ -2457,7 +2564,11 @@
         disconnectSync(message) {
           disconnectSync(message);
         },
-        setSyncStatus
+        setSyncStatus,
+        refreshUI() {
+          renderMenu();
+          renderCard();
+        }
       });
     }
 
@@ -2693,6 +2804,9 @@
 
     function getDeckForCategory(category) {
       if (category === ANSWERED_CATEGORY) {
+        if (isRelationshipSync()) {
+          return cards.filter(card => cardHasRelationshipAnswers(card.id));
+        }
         return cards.filter(card => isAnswered(card.id));
       }
 
@@ -2734,7 +2848,7 @@
               : member.answer;
             return `
               <div class="answer-entry">
-                <p class="answer-title">${escapeHtml(member.email)}</p>
+                <p class="answer-title">${escapeHtml(getAnswerLabel(member, completed))}</p>
                 <p class="answer-text">${escapeHtml(displayAnswer)}</p>
               </div>
             `;
@@ -2875,12 +2989,22 @@
       answerPanel.hidden = true;
       answerPanel.innerHTML = "";
 
-      counter.textContent = `${currentDeck.length} answered ${currentDeck.length === 1 ? "card" : "cards"}`;
+      const inRelationship = isRelationshipSync();
+      const header = answeredPage.querySelector(".answered-page-header");
+      if (header) {
+        header.innerHTML = inRelationship
+          ? `<h2>Answered cards</h2><p>See answers from everyone in your relationship. You can answer any card you have not answered yet.</p>`
+          : `<h2>Your answered cards</h2><p>Review the cards you’ve answered and the responses you saved.</p>`;
+      }
+
+      counter.textContent = `${currentDeck.length} ${inRelationship ? "card" : "answered card"}${currentDeck.length === 1 ? "" : "s"}`;
 
       if (!currentDeck.length) {
         answeredGrid.innerHTML = `
           <div class="answered-empty">
-            You haven’t answered any cards yet. Your saved responses will appear here.
+            ${inRelationship
+              ? "No one in your relationship has answered cards yet."
+              : "You haven’t answered any cards yet. Your saved responses will appear here."}
           </div>
         `;
         return;
@@ -2888,6 +3012,50 @@
 
       answeredGrid.innerHTML = currentDeck.map(card => {
         const isAction = isActionCard(card);
+
+        if (inRelationship) {
+          const memberAnswers = getMemberAnswers(card.id);
+          const hasOwnAnswer = getOwnAnswer(card.id).trim().length > 0;
+          const responsesHtml = memberAnswers.map(member => {
+            const response = isAction && member.answer === "Done" ? "Completed ✓" : member.answer;
+            const actionsHtml = member.isOwn
+              ? `
+                <div class="answered-card-own-actions">
+                  <button class="action" type="button" data-edit-answer="${card.id}">${isAction ? "Update note" : "Edit answer"}</button>
+                  <button class="action danger" type="button" data-delete-answer="${card.id}">${isAction ? "Undo" : "Delete"}</button>
+                </div>
+              `
+              : "";
+            return `
+              <div class="answered-card-response">
+                <strong>${escapeHtml(getAnswerLabel(member, isAction))}</strong>
+                <p>${escapeHtml(response)}</p>
+                ${actionsHtml}
+              </div>
+            `;
+          }).join("");
+          const answerCta = !hasOwnAnswer
+            ? `
+              <div class="answered-card-cta">
+                <button class="action primary" type="button" data-answer-card="${card.id}">
+                  ${isAction ? "Mark as complete" : "Answer this card"}
+                </button>
+              </div>
+            `
+            : "";
+
+          return `
+            <article class="answered-card">
+              <div class="answered-card-meta">
+                ${escapeHtml(card.category)} · Card #${card.id} · ${"♥".repeat(card.depth)}
+              </div>
+              <p class="answered-card-question">${escapeHtml(getCardText(card))}</p>
+              ${responsesHtml}
+              ${answerCta}
+            </article>
+          `;
+        }
+
         const saved = getAnswer(card.id);
         const response = isAction && saved === "Done" ? "Completed ✓" : saved;
         return `
@@ -2923,6 +3091,13 @@
         button.addEventListener("click", async () => {
           if (!firebaseReady) return;
           await syncRef().child(getAnswerWritePath(Number(button.dataset.deleteAnswer))).remove();
+        });
+      });
+
+      answeredGrid.querySelectorAll("[data-answer-card]").forEach(button => {
+        button.addEventListener("click", () => {
+          const card = cards.find(entry => entry.id === Number(button.dataset.answerCard));
+          if (card) openAnswerModal(card);
         });
       });
     }
@@ -3036,6 +3211,11 @@
       if (event.key === "Escape") {
         if (!answerModal.hidden) {
           closeAnswerModal();
+          return;
+        }
+        const settingsModal = document.getElementById("settingsModal");
+        if (settingsModal && !settingsModal.hidden) {
+          window.ConnectionCardsAccount?.setSettingsModalOpen?.(false);
           return;
         }
         if (!roomMenu.hidden) {

@@ -26,6 +26,9 @@
         "emailKey": {
           ".validate": "newData.isString()"
         },
+        "displayName": {
+          ".validate": "newData.isString() && newData.val().length <= 80"
+        },
         "activeRelationshipId": {
           ".validate": "newData.isString()"
         },
@@ -55,6 +58,9 @@
             ".write": "auth != null && (auth.uid == $memberUid || root.child('relationships').child($relationshipId).child('members').child(auth.uid).exists())",
             "email": {
               ".validate": "newData.isString()"
+            },
+            "displayName": {
+              ".validate": "newData.isString() && newData.val().length <= 80"
             },
             "role": {
               ".validate": "newData.isString() && (newData.val() == 'owner' || newData.val() == 'member')"

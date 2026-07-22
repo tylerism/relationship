@@ -8,6 +8,7 @@
   let pendingInvites = {};
   let invitesListener = null;
   let sync = null;
+  let userProfile = {};
 
   function emailKey(email) {
     return email.trim().toLowerCase().replace(/\./g, ",");
@@ -145,6 +146,186 @@
     }
   }
 
+  function setSettingsStatus(message) {
+    setText("settingsStatus", message || "");
+  }
+
+  function setSettingsModalOpen(open) {
+    const modal = $("settingsModal");
+    if (!modal) return;
+    modal.hidden = !open;
+    if (open) {
+      closeAppMenu();
+      populateSettingsForm();
+      setSettingsStatus("");
+      $("settingsDisplayName")?.focus();
+    } else {
+      setSettingsStatus("");
+    }
+  }
+
+  function populateSettingsForm() {
+    if (!isAccountUser(currentUser)) return;
+    if ($("settingsDisplayName")) {
+      $("settingsDisplayName").value = userProfile.displayName || currentUser.displayName || "";
+    }
+    if ($("settingsEmail")) {
+      $("settingsEmail").value = currentUser.email || "";
+    }
+    ["settingsEmailPassword", "settingsCurrentPassword", "settingsNewPassword", "settingsConfirmPassword"].forEach(id => {
+      const el = $(id);
+      if (el) el.value = "";
+    });
+  }
+
+  async function reauthenticateWithPassword(password) {
+    const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, password);
+    await currentUser.reauthenticateWithCredential(credential);
+  }
+
+  function getMemberPayload(role) {
+    const payload = {
+      email: currentUser.email,
+      role,
+      joinedAt: Date.now()
+    };
+    const displayName = (userProfile.displayName || currentUser.displayName || "").trim();
+    if (displayName) payload.displayName = displayName;
+    return payload;
+  }
+
+  async function syncDisplayNameToRelationships(displayName) {
+    const { db } = window.connectionCardsFirebase;
+    const uid = currentUser.uid;
+    await Promise.all(
+      Object.keys(relationships).map(relId =>
+        db.ref(`relationships/${relId}/members/${uid}/displayName`).set(displayName)
+      )
+    );
+    for (const relId of Object.keys(relationships)) {
+      if (relationships[relId]?.members?.[uid]) {
+        relationships[relId].members[uid].displayName = displayName;
+      }
+    }
+  }
+
+  async function saveDisplayName(name) {
+    if (!isAccountUser(currentUser)) return;
+    const trimmed = (name || "").trim();
+    if (!trimmed) {
+      setSettingsStatus("Enter a name to save.");
+      return;
+    }
+    const { db } = window.connectionCardsFirebase;
+    setSettingsStatus("");
+    try {
+      await currentUser.updateProfile({ displayName: trimmed });
+      await db.ref(`users/${currentUser.uid}/displayName`).set(trimmed);
+      userProfile.displayName = trimmed;
+      await syncDisplayNameToRelationships(trimmed);
+      updateAccountUI();
+      sync?.refreshUI?.();
+      setSettingsStatus("Name saved.");
+    } catch (error) {
+      console.error(error);
+      setSettingsStatus(error.message || "Could not save name.");
+    }
+  }
+
+  async function updateUserEmail(newEmail, currentPassword) {
+    if (!isAccountUser(currentUser)) return;
+    const trimmed = (newEmail || "").trim().toLowerCase();
+    if (!trimmed || !trimmed.includes("@")) {
+      setSettingsStatus("Enter a valid email address.");
+      return;
+    }
+    if (!currentPassword) {
+      setSettingsStatus("Enter your current password to update email.");
+      return;
+    }
+    if (trimmed === currentUser.email.toLowerCase()) {
+      setSettingsStatus("That is already your email address.");
+      return;
+    }
+
+    const { db } = window.connectionCardsFirebase;
+    const uid = currentUser.uid;
+    const oldKey = emailKey(currentUser.email);
+    const newKey = emailKey(trimmed);
+    setSettingsStatus("");
+
+    try {
+      await reauthenticateWithPassword(currentPassword);
+      await currentUser.updateEmail(trimmed);
+      await db.ref(`users/${uid}`).update({ email: trimmed, emailKey: newKey });
+      userProfile.email = trimmed;
+      userProfile.emailKey = newKey;
+
+      await Promise.all(
+        Object.keys(relationships).map(relId =>
+          db.ref(`relationships/${relId}/members/${uid}/email`).set(trimmed)
+        )
+      );
+      for (const relId of Object.keys(relationships)) {
+        if (relationships[relId]?.members?.[uid]) {
+          relationships[relId].members[uid].email = trimmed;
+        }
+      }
+
+      const oldInvitesSnap = await db.ref(`invitesByEmail/${oldKey}`).once("value");
+      if (oldInvitesSnap.exists()) {
+        await db.ref(`invitesByEmail/${newKey}`).set(oldInvitesSnap.val());
+        await db.ref(`invitesByEmail/${oldKey}`).remove();
+      }
+
+      detachInvitesListener();
+      listenPendingInvites(currentUser);
+      populateSettingsForm();
+      updateAccountUI();
+      setSettingsStatus("Email updated.");
+    } catch (error) {
+      console.error(error);
+      if (error.code === "auth/requires-recent-login") {
+        setSettingsStatus("Sign out, sign in again, then retry.");
+      } else {
+        setSettingsStatus(error.message || "Could not update email.");
+      }
+    }
+  }
+
+  async function changeUserPassword(currentPassword, newPassword, confirmPassword) {
+    if (!isAccountUser(currentUser)) return;
+    if (!currentPassword) {
+      setSettingsStatus("Enter your current password.");
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setSettingsStatus("New password must be at least 6 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setSettingsStatus("New passwords do not match.");
+      return;
+    }
+
+    setSettingsStatus("");
+    try {
+      await reauthenticateWithPassword(currentPassword);
+      await currentUser.updatePassword(newPassword);
+      $("settingsCurrentPassword").value = "";
+      $("settingsNewPassword").value = "";
+      $("settingsConfirmPassword").value = "";
+      setSettingsStatus("Password updated.");
+    } catch (error) {
+      console.error(error);
+      if (error.code === "auth/requires-recent-login") {
+        setSettingsStatus("Sign out, sign in again, then retry.");
+      } else {
+        setSettingsStatus(error.message || "Could not change password.");
+      }
+    }
+  }
+
   function setAccountActionStatus(message) {
     setText("accountActionStatus", message || "");
   }
@@ -235,7 +416,7 @@
     list.hidden = false;
     for (const member of Object.values(rel.members)) {
       const item = document.createElement("li");
-      item.textContent = member.email + (member.role === "owner" ? " (owner)" : "");
+      item.textContent = (member.displayName || member.email) + (member.role === "owner" ? " (owner)" : "");
       list.appendChild(item);
     }
   }
@@ -274,12 +455,25 @@
     if (!snap.exists()) {
       await userRef.set({
         email: user.email,
-        emailKey: key
+        emailKey: key,
+        displayName: user.displayName || ""
       });
+      userProfile = { email: user.email, emailKey: key, displayName: user.displayName || "" };
     } else {
       const data = snap.val();
+      userProfile = data;
+      const updates = {};
       if (!data.emailKey || data.email !== user.email) {
-        await userRef.update({ email: user.email, emailKey: key });
+        updates.email = user.email;
+        updates.emailKey = key;
+      }
+      const profileName = (user.displayName || data.displayName || "").trim();
+      if (profileName && data.displayName !== profileName) {
+        updates.displayName = profileName;
+      }
+      if (Object.keys(updates).length) {
+        await userRef.update(updates);
+        userProfile = { ...data, ...updates };
       }
     }
   }
@@ -366,11 +560,7 @@
       createdBy: currentUser.uid,
       createdAt: now,
       members: {
-        [currentUser.uid]: {
-          email: currentUser.email,
-          role: "owner",
-          joinedAt: now
-        }
+        [currentUser.uid]: getMemberPayload("owner")
       }
     });
     await db.ref(`users/${currentUser.uid}`).update({
@@ -381,11 +571,7 @@
       id,
       name: trimmed,
       members: {
-        [currentUser.uid]: {
-          email: currentUser.email,
-          role: "owner",
-          joinedAt: now
-        }
+        [currentUser.uid]: getMemberPayload("owner")
       }
     };
     connectToRelationship(id);
@@ -426,12 +612,7 @@
   async function addMemberToRelationship(relId) {
     const { db } = window.connectionCardsFirebase;
     const key = emailKey(currentUser.email);
-    const now = Date.now();
-    await db.ref(`relationships/${relId}/members/${currentUser.uid}`).set({
-      email: currentUser.email,
-      role: "member",
-      joinedAt: now
-    });
+    await db.ref(`relationships/${relId}/members/${currentUser.uid}`).set(getMemberPayload("member"));
     await db.ref(`users/${currentUser.uid}`).update({
       [`relationships/${relId}`]: true,
       activeRelationshipId: relId
@@ -686,6 +867,25 @@
       signOut();
     });
 
+    $("settingsBtn")?.addEventListener("click", () => {
+      setSettingsModalOpen(true);
+    });
+    $("settingsModalClose")?.addEventListener("click", () => setSettingsModalOpen(false));
+    $("settingsModalBackdrop")?.addEventListener("click", () => setSettingsModalOpen(false));
+    $("settingsSaveNameBtn")?.addEventListener("click", () => {
+      saveDisplayName($("settingsDisplayName")?.value);
+    });
+    $("settingsUpdateEmailBtn")?.addEventListener("click", () => {
+      updateUserEmail($("settingsEmail")?.value, $("settingsEmailPassword")?.value);
+    });
+    $("settingsUpdatePasswordBtn")?.addEventListener("click", () => {
+      changeUserPassword(
+        $("settingsCurrentPassword")?.value,
+        $("settingsNewPassword")?.value,
+        $("settingsConfirmPassword")?.value
+      );
+    });
+
     $("accountMenuBtn")?.addEventListener("click", event => {
       event.stopPropagation();
       setAccountMenuOpen($("accountMenuPanel")?.hidden);
@@ -788,7 +988,15 @@
     closeMenus() {
       closeMenus();
     },
-    setAccountMenuOpen
+    setAccountMenuOpen,
+    setSettingsModalOpen,
+    getDisplayName(uid) {
+      if (uid === currentUser?.uid) {
+        return userProfile.displayName || currentUser.displayName || currentUser.email || "You";
+      }
+      const member = activeRelationshipId ? relationships[activeRelationshipId]?.members?.[uid] : null;
+      return member?.displayName || member?.email || "Partner";
+    }
   };
 
   window.setAppMenuOpen = setAccountMenuOpen;
