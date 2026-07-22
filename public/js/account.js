@@ -107,18 +107,30 @@
     if (open) {
       setAuthTab("signin");
       $("authSignInEmail")?.focus();
-      window.setAppMenuOpen?.(false);
+      closeAppMenu();
     } else {
       showAuthError("");
     }
   }
 
+  function setAccountMenuOpen(open) {
+    const menu = $("accountMenuPanel");
+    const btn = $("accountMenuBtn");
+    if (!menu || !btn) return;
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      setRelationshipMenuOpen(false);
+    }
+  }
+
   function closeAppMenu() {
-    window.setAppMenuOpen?.(false);
+    setAccountMenuOpen(false);
   }
 
   function closeMenus() {
     setRelationshipMenuOpen(false);
+    setAccountMenuOpen(false);
   }
 
   function setRelationshipMenuOpen(open) {
@@ -155,7 +167,7 @@
     document.querySelectorAll(".account-only").forEach(el => {
       el.hidden = !isAccount;
     });
-    setText("appMenuMode", isAccount ? "Signed in" : "Free mode");
+    document.querySelector(".header-controls")?.classList.toggle("account-header", isAccount);
     if (!isAccount) {
       closeAppMenu();
     }
@@ -230,8 +242,6 @@
 
   function updateAccountUI() {
     if (!isAccountUser(currentUser)) return;
-    setText("appMenuMode", shortenEmail(currentUser.email));
-    setText("accountMenuEmail", currentUser.email);
     const rel = activeRelationshipId ? relationships[activeRelationshipId] : null;
     setText("relationshipCode", rel?.name || "…");
     const shareSection = $("shareRelationshipSection");
@@ -676,6 +686,15 @@
       signOut();
     });
 
+    $("accountMenuBtn")?.addEventListener("click", event => {
+      event.stopPropagation();
+      setAccountMenuOpen($("accountMenuPanel")?.hidden);
+    });
+
+    $("accountMenuPanel")?.addEventListener("click", event => {
+      event.stopPropagation();
+    });
+
     $("relationshipMenuBtn")?.addEventListener("click", event => {
       event.stopPropagation();
       setRelationshipMenuOpen($("relationshipMenu")?.hidden);
@@ -713,6 +732,9 @@
     });
 
     document.addEventListener("click", event => {
+      if (!$("accountMenuPanel")?.hidden && !event.target.closest(".account-menu")) {
+        setAccountMenuOpen(false);
+      }
       if (!$("relationshipMenu")?.hidden && !event.target.closest(".relationship-dropdown")) {
         setRelationshipMenuOpen(false);
       }
@@ -765,6 +787,9 @@
     },
     closeMenus() {
       closeMenus();
-    }
+    },
+    setAccountMenuOpen
   };
+
+  window.setAppMenuOpen = setAccountMenuOpen;
 })();

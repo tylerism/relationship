@@ -533,6 +533,30 @@
       font-size: 0.85rem;
     }
 
+    .account-menu.dropdown {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 72;
+      flex-shrink: 0;
+    }
+
+    .header-controls.account-header {
+      padding-right: 54px;
+    }
+
+    .relationship-dropdown {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    #relationshipMenuBtn {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .sync-status {
       position: fixed;
       right: 20px;
@@ -597,6 +621,52 @@
       max-width: calc(100vw - 90px);
     }
 
+    .hamburger-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.7);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+
+    .hamburger-btn[aria-expanded="true"] {
+      color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(196, 79, 146, .18);
+    }
+
+    .hamburger-icon {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .hamburger-icon::before,
+    .hamburger-icon::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+    }
+
+    .hamburger-icon::before {
+      top: -6px;
+    }
+
+    .hamburger-icon::after {
+      top: 6px;
+    }
+
     .dropdown {
       position: relative;
     }
@@ -631,6 +701,11 @@
     .menu-item {
       width: 100%;
       text-align: left;
+    }
+
+    a.menu-item {
+      display: block;
+      text-decoration: none;
     }
 
     .menu-item.active {
@@ -799,7 +874,7 @@
             aria-haspopup="true"
             aria-controls="roomMenu"
           >
-            Join Room
+            <span id="roomMenuLabel">Join Room</span>
           </button>
           <div class="room-menu menu-panel" id="roomMenu" hidden>
             <p class="room-menu-label">Join a room</p>
@@ -889,6 +964,24 @@
             <span class="menu-hint" id="joinRelationshipStatus"></span>
             <p class="room-menu-label">Members</p>
             <ul class="members-list" id="membersList" hidden></ul>
+          </div>
+        </div>
+
+        <div class="account-only account-menu dropdown" hidden>
+          <button
+            class="hamburger-btn"
+            type="button"
+            id="accountMenuBtn"
+            aria-label="Open account menu"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="accountMenuPanel"
+          >
+            <span class="hamburger-icon" aria-hidden="true"></span>
+          </button>
+          <div class="menu-panel account-menu-panel" id="accountMenuPanel" hidden>
+            <a class="action menu-item" href="/settings.html">Settings</a>
+            <button class="action" type="button" id="signOutBtn">Sign Out</button>
           </div>
         </div>
       </div>
@@ -2123,6 +2216,7 @@
     const hearts = document.getElementById("hearts");
     const counter = document.getElementById("counter");
     const roomCodeEl = document.getElementById("roomCode");
+    const roomMenuLabel = document.getElementById("roomMenuLabel");
     const roomMenuBtn = document.getElementById("roomMenuBtn");
     const roomMenu = document.getElementById("roomMenu");
     const roomJoinInput = document.getElementById("roomJoinInput");
@@ -2286,11 +2380,17 @@
       renderCard();
     }
 
+    function updateRoomMenuLabel() {
+      if (!roomMenuLabel) return;
+      roomMenuLabel.textContent = roomId ? `Room: ${roomId}` : "Join Room";
+    }
+
     function updateRoomDisplay(code) {
       roomId = code;
       roomCodeEl.textContent = code;
       roomJoinInput.value = code;
       localStorage.setItem(ROOM_KEY, code);
+      updateRoomMenuLabel();
     }
 
     function connectToSyncPath(path, displayLabel, mode) {
@@ -2942,6 +3042,8 @@
           setRoomMenuOpen(false);
           return;
         }
+        window.ConnectionCardsAccount?.closeMenus?.();
+        return;
       }
 
       const targetTag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
@@ -3006,6 +3108,7 @@
 
     currentDeck = getDeckForCategory(activeCategory);
     applyTheme(activeCategory);
+    updateRoomMenuLabel();
     renderMenu();
     renderCard();
     initFirebase();
