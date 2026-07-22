@@ -44,72 +44,15 @@
 
     header {
       display: flex;
-      justify-content: space-between;
       gap: 16px;
       align-items: flex-start;
-      flex-wrap: wrap;
     }
 
     .header-main {
       display: flex;
       align-items: flex-start;
-      gap: 14px;
       flex: 1;
       min-width: 0;
-    }
-
-    .app-menu {
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .hamburger-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(255,255,255,.7);
-      display: grid;
-      place-items: center;
-      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
-    }
-
-    .hamburger-btn[aria-expanded="true"] {
-      color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(196, 79, 146, .18);
-    }
-
-    .hamburger-icon {
-      display: block;
-      width: 18px;
-      height: 2px;
-      background: currentColor;
-      border-radius: 999px;
-      position: relative;
-    }
-
-    .hamburger-icon::before,
-    .hamburger-icon::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      width: 18px;
-      height: 2px;
-      background: currentColor;
-      border-radius: 999px;
-    }
-
-    .hamburger-icon::before {
-      top: -6px;
-    }
-
-    .hamburger-icon::after {
-      top: 6px;
-    }
-
-    .app-menu-panel {
-      left: 0;
-      right: auto;
     }
 
     .header-copy {
@@ -118,7 +61,7 @@
 
     .content {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 210px 1fr;
       gap: 20px;
       align-items: start;
     }
@@ -146,63 +89,40 @@
       font-weight: 700;
     }
 
+    .menu {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      padding: 12px;
+      background: rgba(255,255,255,.45);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 24px;
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 24px;
+    }
+
     button {
       border: 0;
       cursor: pointer;
       font: inherit;
     }
 
-    .category-picker {
-      width: min(650px, 100%);
-      margin: 0 auto;
-      display: grid;
-      gap: 7px;
-    }
-
-    .category-picker label {
-      padding-left: 4px;
-      color: var(--muted);
-      font-size: .76rem;
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .category-select-wrap {
-      position: relative;
-    }
-
-    .category-select-wrap::after {
-      content: "⌄";
-      position: absolute;
-      top: 50%;
-      right: 18px;
-      transform: translateY(-58%);
-      color: white;
-      font-size: 1.25rem;
-      font-weight: 900;
-      pointer-events: none;
-    }
-
-    .category-select {
-      width: 100%;
-      appearance: none;
-      padding: 13px 48px 13px 18px;
-      border: 0;
-      border-radius: 16px;
+    .category-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
       color: var(--ink);
-      background:
-        linear-gradient(135deg, var(--accent), var(--accent2));
-      color: white;
-      box-shadow: 0 12px 30px var(--glow);
-      font: inherit;
+      background: rgba(255,255,255,.72);
       font-weight: 800;
-      cursor: pointer;
+      text-align: left;
+      transition: transform .16s ease, background .16s ease, color .16s ease;
     }
 
-    .category-select:focus-visible {
-      outline: 3px solid rgba(255,255,255,.92);
-      outline-offset: 3px;
+    .category-btn:hover { transform: translateY(-2px); }
+
+    .category-btn.active {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
 
     .stage {
@@ -511,9 +431,18 @@
     }
 
     @media (max-width: 640px) {
-      body { padding: 14px; }
+      body { padding: 92px 14px 14px; }
+      .content {
+        grid-template-columns: 1fr;
+      }
+      .menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: static;
+      }
       .stage { min-height: 420px; }
       .card { min-height: 340px; border-radius: 30px; }
+      .category-btn { flex: 1 1 auto; }
       .action { flex: 1; }
     }
 
@@ -605,6 +534,15 @@
     }
 
     .sync-status {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 80;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: 0 10px 30px rgba(83, 38, 86, .08);
       font-size: 0.85rem;
       color: var(--muted);
     }
@@ -647,10 +585,16 @@
     }
 
     .header-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 70;
       display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: calc(100vw - 90px);
     }
 
     .dropdown {
@@ -838,42 +782,14 @@
   <main class="app">
     <header>
       <div class="header-main">
-        <div class="app-menu dropdown">
-          <button
-            class="hamburger-btn"
-            type="button"
-            id="appMenuBtn"
-            aria-label="Open menu"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="appMenuPanel"
-          >
-            <span class="hamburger-icon" aria-hidden="true"></span>
-          </button>
-          <div class="menu-panel app-menu-panel" id="appMenuPanel" hidden>
-            <p class="room-menu-label">Status</p>
-            <p class="menu-hint" id="appMenuMode">Free mode</p>
-            <p class="menu-hint" id="appMenuCardCount">0 cards</p>
-            <div class="guest-only" id="appMenuGuestSection">
-              <button class="action primary" type="button" id="signInBtn" style="width:100%;">Sign In</button>
-            </div>
-            <div class="account-only" id="appMenuAccountSection" hidden>
-              <p class="room-menu-label">Your account</p>
-              <p class="menu-hint" id="accountMenuEmail"></p>
-              <p class="menu-hint">Manage sign-in, reset your password, or delete your account.</p>
-              <button class="action" type="button" id="resetPasswordBtn">Send Password Reset Email</button>
-              <button class="action" type="button" id="signOutBtn">Sign Out</button>
-              <button class="action menu-danger" type="button" id="deleteAccountBtn">Delete Account</button>
-              <span class="menu-hint" id="accountActionStatus"></span>
-            </div>
-          </div>
-        </div>
         <div class="header-copy">
           <h1>Connection Cards</h1>
           <p class="subtitle">Pick a category, draw a card, answer questions or complete actions together.</p>
         </div>
       </div>
       <div class="header-controls">
+        <button class="action primary guest-only" type="button" id="signInBtn">Log In / Sign Up</button>
+
         <div class="guest-only room-dropdown dropdown">
           <button
             class="action room-menu-btn"
@@ -883,10 +799,11 @@
             aria-haspopup="true"
             aria-controls="roomMenu"
           >
-            Room <strong id="roomCode">…</strong>
+            Join Room
           </button>
           <div class="room-menu menu-panel" id="roomMenu" hidden>
             <p class="room-menu-label">Join a room</p>
+            <p class="menu-hint">Current room: <strong id="roomCode">…</strong></p>
             <input
               id="roomJoinInput"
               class="room-input"
@@ -974,18 +891,13 @@
             <ul class="members-list" id="membersList" hidden></ul>
           </div>
         </div>
-
-        <span class="sync-status" id="syncStatus">Connecting…</span>
       </div>
     </header>
 
+    <span class="sync-status" id="syncStatus">Connecting…</span>
+
     <div class="content">
-      <div class="category-picker">
-        <label for="categorySelect">Choose a category</label>
-        <div class="category-select-wrap">
-          <select class="category-select" id="categorySelect" aria-label="Choose a card category"></select>
-        </div>
-      </div>
+      <nav class="menu" id="categoryMenu" aria-label="Card categories"></nav>
 
       <section class="stage" id="cardStage">
         <article class="card" id="cardSurface">
@@ -2198,7 +2110,7 @@
     let skippedIds = [];
     let modalCardId = null;
 
-    const categorySelect = document.getElementById("categorySelect");
+    const menu = document.getElementById("categoryMenu");
     const cardStage = document.getElementById("cardStage");
     const answeredPage = document.getElementById("answeredPage");
     const answeredGrid = document.getElementById("answeredGrid");
@@ -2210,9 +2122,6 @@
     const depthLabel = document.getElementById("depthLabel");
     const hearts = document.getElementById("hearts");
     const counter = document.getElementById("counter");
-    const appMenuCardCount = document.getElementById("appMenuCardCount");
-    const appMenuBtn = document.getElementById("appMenuBtn");
-    const appMenuPanel = document.getElementById("appMenuPanel");
     const roomCodeEl = document.getElementById("roomCode");
     const roomMenuBtn = document.getElementById("roomMenuBtn");
     const roomMenu = document.getElementById("roomMenu");
@@ -2240,22 +2149,6 @@
       syncStatus.textContent = text;
       syncStatus.classList.toggle("error", !!isError);
     }
-
-    function setAppMenuOpen(open) {
-      if (!appMenuPanel || !appMenuBtn) return;
-      appMenuPanel.hidden = !open;
-      appMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    }
-
-    function toggleAppMenu() {
-      if (appMenuPanel.hidden) {
-        setRoomMenuOpen(false);
-        window.ConnectionCardsAccount?.closeMenus?.();
-      }
-      setAppMenuOpen(appMenuPanel.hidden);
-    }
-
-    window.setAppMenuOpen = setAppMenuOpen;
 
     function setRoomMenuOpen(open) {
       roomMenu.hidden = !open;
@@ -2859,18 +2752,21 @@
     }
 
     function renderMenu() {
-      categorySelect.innerHTML = categories
-        .map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
-        .join("");
-      categorySelect.value = activeCategory;
-      categorySelect.onchange = () => {
-        activeCategory = categorySelect.value;
-        currentDeck = getDeckForCategory(activeCategory);
-        currentIndex = 0;
-        applyTheme(activeCategory);
-        renderMenu();
-        renderCard();
-      };
+      menu.innerHTML = "";
+      categories.forEach(category => {
+        const btn = document.createElement("button");
+        btn.className = "category-btn" + (category === activeCategory ? " active" : "");
+        btn.textContent = category;
+        btn.addEventListener("click", () => {
+          activeCategory = category;
+          currentDeck = getDeckForCategory(category);
+          currentIndex = 0;
+          applyTheme(category);
+          renderMenu();
+          renderCard();
+        });
+        menu.appendChild(btn);
+      });
     }
 
     function renderAnsweredPage() {
@@ -2880,9 +2776,6 @@
       answerPanel.innerHTML = "";
 
       counter.textContent = `${currentDeck.length} answered ${currentDeck.length === 1 ? "card" : "cards"}`;
-      if (appMenuCardCount) {
-        appMenuCardCount.textContent = `${currentDeck.length} cards in ${ANSWERED_CATEGORY}`;
-      }
 
       if (!currentDeck.length) {
         answeredGrid.innerHTML = `
@@ -2966,7 +2859,6 @@
         depthLabel.textContent = "";
         hearts.textContent = "";
         counter.textContent = `0 cards in ${activeCategory}`;
-        if (appMenuCardCount) appMenuCardCount.textContent = "0 cards in " + activeCategory;
         renderAnswerPanel(null);
         return;
       }
@@ -2981,7 +2873,6 @@
       answerBtn.textContent = isAction ? "We Did It" : "Answer Card";
       skipBtn.textContent = isAction ? "Skip Action" : "Skip Question";
       counter.textContent = `${currentIndex + 1} of ${currentDeck.length} in ${activeCategory}`;
-      if (appMenuCardCount) appMenuCardCount.textContent = `${currentDeck.length} cards in ${activeCategory}`;
       renderAnswerPanel(card);
     }
 
@@ -3047,10 +2938,6 @@
           closeAnswerModal();
           return;
         }
-        if (!appMenuPanel.hidden) {
-          setAppMenuOpen(false);
-          return;
-        }
         if (!roomMenu.hidden) {
           setRoomMenuOpen(false);
           return;
@@ -3066,24 +2953,12 @@
       if (event.key.toLowerCase() === "s") shuffleDeck();
     });
 
-    appMenuBtn.addEventListener("click", event => {
-      event.stopPropagation();
-      toggleAppMenu();
-    });
-
-    appMenuPanel.addEventListener("click", event => {
-      event.stopPropagation();
-    });
-
     roomMenuBtn.addEventListener("click", event => {
       event.stopPropagation();
       toggleRoomMenu();
     });
 
     document.addEventListener("click", event => {
-      if (!appMenuPanel.hidden && !event.target.closest(".app-menu")) {
-        setAppMenuOpen(false);
-      }
       if (!roomMenu.hidden && !event.target.closest(".room-dropdown")) {
         setRoomMenuOpen(false);
       }
